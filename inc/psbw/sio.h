@@ -4,7 +4,7 @@
 #define SIO_BAUD_9600   9600
 
 // Initializes serial communication with the given baudrate. At this point only 8 data bits and 1 stop bit is supported
-void initSIO(int baudrate);
+void sio_init(int baudrate);
 
 // Prints a string of characters to the serial
-void printSIO(const char* str);
+void sio_print(const char* str);

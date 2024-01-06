@@ -10,7 +10,7 @@ static void printCharacter(char ch) {
 		SIO_DATA(1) = ch;
 }
 
-void initSIO(int baudrate) {
+void sio_init(int baudrate) {
 	SIO_CTRL(1) = SIO_CTRL_RESET;
 
 	SIO_MODE(1) = SIO_MODE_BAUD_DIV16 | SIO_MODE_DATA_8 | SIO_MODE_STOP_1;
@@ -18,7 +18,7 @@ void initSIO(int baudrate) {
 	SIO_CTRL(1) = SIO_CTRL_TX_ENABLE | SIO_CTRL_RX_ENABLE | SIO_CTRL_RTS;
 }
 
-void printSIO(const char* str) {
+void sio_print(const char* str) {
 	for (; *str; str++)
 		printCharacter(*str);
 }

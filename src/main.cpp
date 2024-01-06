@@ -1,10 +1,16 @@
-#include <psbw/sio.h>
+#include "game/game.h"
+#include "draw.h"
+#include "psbw/sio.h"
 
-int main(int argc, const char **argv) {
-	initSIO(SIO_BAUD_115200);
-	printSIO("hello\n");
+void main() {
+	sio_init(SIO_BAUD_115200);
+	game_setup();
+	draw_init();
+
 	for(;;) {
-		printSIO("hello\n");
+		game_loop();
+		draw_update();
+		
+		for(int i = 0; i < 20000; i++);
 	}
-	return 0;
 }
