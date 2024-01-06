@@ -15,7 +15,7 @@ class Sprite : public Component {
         Vector3D Color;
         SpriteType Type;
 
-        void execute(GameObject* parent) override;
+        void execute(GameObject* parent, uint32_t* ptr) override;
     
     private:
 };

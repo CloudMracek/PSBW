@@ -6,11 +6,11 @@
 #include <ps1/registers.h>
 #include "psbw/sio.h"
 
-void Sprite::execute(GameObject* parent) {
+void Sprite::execute(GameObject* parent, uint32_t* ptr) {
     sio_print("x");
-    GPU_GP0 = gp0_rgb(Color.x, Color.y, Color.z) | gp0_rectangle(false, false, false);
-	GPU_GP0 = gp0_xy(parent->position.x, parent->position.y);
-	GPU_GP0 = gp0_xy(Width, Height);
+    ptr[0] = gp0_rgb(Color.x, Color.y, Color.z) | gp0_rectangle(false, false, false);
+	ptr[1] = gp0_xy(parent->position.x, parent->position.y);
+	ptr[2] = gp0_xy(Width, Height);
 }
 
 Sprite::Sprite(SpriteType type) {

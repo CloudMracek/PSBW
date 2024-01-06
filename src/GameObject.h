@@ -10,5 +10,5 @@ public:
     Vector3D rotation;
     GameObject(int x, int y, int z);
     Component* components[10];
-    void execute();
+    void execute(uint32_t* ptr);
 };
