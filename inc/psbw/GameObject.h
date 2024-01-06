@@ -1,7 +1,7 @@
 #pragma once
 
-#include "vector.h"
-#include "Component.h"  // Include Component.h as it's used here
+#include "psbw/vector.h"
+#include "psbw/Component.h"  // Include Component.h as it's used here
 
 
 class GameObject {

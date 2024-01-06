@@ -2,8 +2,8 @@
 #include <ps1/registers.h>
 
 #include "draw.h"
-#include "Sprite.h"
-#include "GameObject.h"
+#include "psbw/Sprite.h"
+#include "psbw/GameObject.h"
 
 #define SCREEN_WIDTH  320
 #define SCREEN_HEIGHT 240
@@ -15,13 +15,12 @@ typedef struct {
 	uint32_t *nextPacket;
 } DMAChain;
 
-
-GameObject* obj;
-Sprite* spr;
-
+Scene* activeScene;
+void load_scene(Scene* scene) {
+	activeScene = scene;
+}
 
 // Private util functions
-
 static void gpu_gp0_wait_ready(void) {
 	while (!(GPU_GP1 & GP1_STAT_CMD_READY))
 		__asm__ volatile("");
@@ -70,15 +69,6 @@ void gpu_setup(GP1VideoMode mode, int width, int height) {
 
 	DMA_DPCR |= DMA_DPCR_ENABLE << (DMA_GPU * 4);
 
-	obj = new GameObject(100,100,100);
-	spr = new Sprite(SPRITE_TYPE_FLAT_COLOR);
-
-	spr->Color.x = 0;
-	spr->Color.y = 255;
-	spr->Color.z = 0;
-
-	obj->components[0] = spr;
-
     // Origin of framebuffer based on if PAL or NTSC
     int x = 0x760;
     int y = (mode = GP1_MODE_PAL) ? 0xa3 : 0x88;
@@ -118,8 +108,6 @@ void draw_init() {
 	GPU_GP1 = gp1_dispBlank(false);
 }
 
-int goRight = 1;
-
 bool currentBuffer = false;
 DMAChain dmaChains[2];
 void draw_update() {
@@ -147,22 +135,14 @@ void draw_update() {
 	ptr[1] = gp0_xy(frameX, frameY);
     ptr[2] = gp0_xy(SCREEN_WIDTH, SCREEN_HEIGHT);
 
-	ptr = dma_allocate_packet(chain, 3);
-	obj->execute(ptr);
-
-	if(obj->position.x+spr->Width >= SCREEN_WIDTH && goRight) {
-		goRight = 0;
-	}
-
-	if(!goRight && obj->position.x <= 0) {
-		goRight = 1;
-	}
-
-	if(goRight) {
-		obj->position.x++;
-	}
-	else {
-		obj->position.x--;
+	for(int i = 0; i < 100; i++) {
+		if(activeScene->objects[i] != nullptr) {
+			ptr = dma_allocate_packet(chain, 3);
+			activeScene->objects[i]->execute(ptr);
+		}
+		else {
+			break;
+		}
 	}
 
 	*(chain->nextPacket) = gp0_endTag(0);

@@ -1,5 +1,5 @@
-#include "Component.h"
-#include "vector.h"
+#include "psbw/Component.h"
+#include "psbw/vector.h"
 
 #define SPRITE_TYPE_FLAT_COLOR 0
 #define SPRITE_TYPE_TEXTURED 1

@@ -1,4 +1,4 @@
-#include "GameObject.h"
+#include "psbw/GameObject.h"
 #include "psbw/sio.h"
 #include <cstdint>
 
@@ -14,5 +14,8 @@ void GameObject::execute(uint32_t* ptr) {
         if(components[i] != nullptr) {
             components[i]->execute(this, ptr);
         }
+        else {
+            break;
+        }   
     }
 }

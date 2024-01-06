@@ -1,4 +1,8 @@
+#pragma once
+#include "psbw/Scene.h"
 
-// Initializes the gpu in PAL/NTSC based on what state it was left in by the bios
+class Scene;
+
+void load_scene(Scene* scene);
 void draw_init();
 void draw_update();

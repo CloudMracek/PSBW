@@ -1,6 +1,6 @@
-#include "Sprite.h"
-#include "vector.h"
-#include "GameObject.h"
+#include "psbw/Sprite.h"
+#include "psbw/vector.h"
+#include "psbw/GameObject.h"
 
 #include <ps1/gpucmd.h>
 #include <ps1/registers.h>
