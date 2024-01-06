@@ -1,11 +1,11 @@
 #include "game/game.h"
-#include "draw.h"
+#include "psbw/draw.h"
 #include "psbw/sio.h"
 
 void main() {
 	sio_init(SIO_BAUD_115200);
-	game_setup();
 	draw_init();
+	game_setup();
 
 	for(;;) {
 		game_loop();

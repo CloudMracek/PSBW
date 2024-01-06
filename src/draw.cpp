@@ -1,19 +1,22 @@
 #include <ps1/gpucmd.h>
 #include <ps1/registers.h>
 
-#include "draw.h"
+#include "psbw/draw.h"
 #include "psbw/Sprite.h"
 #include "psbw/GameObject.h"
+#include "psbw/Texture.h"
+#include "psbw/settings.h"
 
-#define SCREEN_WIDTH  320
-#define SCREEN_HEIGHT 240
 
+#define DMA_MAX_CHUNK_SIZE 16
 #define CHAIN_BUFFER_SIZE 1024
 
 typedef struct {
 	uint32_t data[CHAIN_BUFFER_SIZE];
 	uint32_t *nextPacket;
 } DMAChain;
+
+DMAChain *chain;
 
 Scene* activeScene;
 void load_scene(Scene* scene) {
@@ -34,7 +37,6 @@ static void dma_send_linked_list(const void *data) {
 
 	// Make sure the pointer is aligned to 32 bits (4 bytes). The DMA engine is
 	// not capable of reading unaligned data.
-	//assert(!((uint32_t) data % 4));
 
 	// Give DMA a pointer to the beginning of the data and tell it to send it in
 	// linked list mode. The DMA unit will start parsing a chain of "packets"
@@ -44,7 +46,7 @@ static void dma_send_linked_list(const void *data) {
 	DMA_CHCR(DMA_GPU) = DMA_CHCR_WRITE | DMA_CHCR_MODE_LIST | DMA_CHCR_ENABLE;
 }
 
-static uint32_t *dma_allocate_packet(DMAChain *chain, int numCommands) {
+uint32_t *dma_allocate_packet(DMAChain *chain, int numCommands) {
 	// Grab the current pointer to the next packet then increment it to allocate
 	// a new packet. We have to allocate an extra word for the packet's header,
 	// which will contain the number of GP0 commands the packet is made up of as
@@ -59,15 +61,86 @@ static uint32_t *dma_allocate_packet(DMAChain *chain, int numCommands) {
 
 	// Make sure we haven't yet run out of space for future packets or a linked
 	// list terminator, then return a pointer to the packet's first GP0 command.
-	//assert(chain->nextPacket < &(chain->data)[CHAIN_BUFFER_SIZE]);
-
 	return &ptr[1];
 }
 
+uint32_t *dma_get_chain_pointer(int numCommands) {
+	return dma_allocate_packet(chain, numCommands);
+}
+
+static void dma_wait_done(void) {
+	while (DMA_CHCR(DMA_GPU) & DMA_CHCR_ENABLE)
+		__asm__ volatile("");
+}
+
+static void vram_send_data(const void *data, int x, int y, int width, int height) {
+	dma_wait_done();
+
+	// Calculate how many 32-bit words will be sent from the width and height of
+	// the texture. If more than 16 words have to be sent, configure DMA to
+	// split the transfer into 16-word chunks in order to make sure the GPU will
+	// not miss any data.
+	size_t length = (width * height) / 2;
+	size_t chunkSize, numChunks;
+
+	if (length < DMA_MAX_CHUNK_SIZE) {
+		chunkSize = length;
+		numChunks = 1;
+	} else {
+		chunkSize = DMA_MAX_CHUNK_SIZE;
+		numChunks = length / DMA_MAX_CHUNK_SIZE;
+
+		// Make sure the length is an exact multiple of 16 words, as otherwise
+		// the last chunk would be dropped (the DMA unit does not support
+		// "incomplete" chunks). Note that this will impose limitations on the
+		// size of VRAM uploads.
+	}
+
+	// Put the GPU into VRAM upload mode by sending the appropriate GP0 command
+	// and our coordinates.
+	gpu_gp0_wait_ready();
+	GPU_GP0 = gp0_vramWrite();
+	GPU_GP0 = gp0_xy(x, y);
+	GPU_GP0 = gp0_xy(width, height);
+
+	// Give DMA a pointer to the beginning of the data and tell it to send it in
+	// slice (chunked) mode.
+	DMA_MADR(DMA_GPU) = (uint32_t) data;
+	DMA_BCR (DMA_GPU) = chunkSize | (numChunks << 16);
+	DMA_CHCR(DMA_GPU) = DMA_CHCR_WRITE | DMA_CHCR_MODE_SLICE | DMA_CHCR_ENABLE;
+}
+
+
+void tex_upload(
+	Texture *info, const void *data, int x, int y, int width, int height
+) {
+	// Make sure the texture's size is valid. The GPU does not support textures
+	// larger than 256x256 pixels.
+	// Upload the texture to VRAM and wait for the process to complete.
+	vram_send_data(data, x, y, width, height);
+	dma_wait_done();
+	// Update the "texpage" attribute, a 16-bit field telling the GPU several
+	// details about the texture such as which 64x256 page it can be found in,
+	// its color depth and how semitransparent pixels shall be blended.
+	info->page = gp0_page(
+		x / 64, y / 256, GP0_BLEND_SEMITRANS, GP0_COLOR_16BPP
+	);
+
+	// Calculate the texture's UV coordinates, i.e. its X/Y coordinates relative
+	// to the top left corner of the texture page.
+	info->u      = (uint8_t)  (x % 64);
+	info->v      = (uint8_t)  (y % 256);
+	info->width  = (uint16_t) width;
+	info->height = (uint16_t) height;
+}
 
 void gpu_setup(GP1VideoMode mode, int width, int height) {
 
 	DMA_DPCR |= DMA_DPCR_ENABLE << (DMA_GPU * 4);
+
+	GPU_GP1 = gp1_dmaRequestMode(GP1_DREQ_GP0_WRITE);
+	GPU_GP1 = gp1_dispBlank(false);
+
 
     // Origin of framebuffer based on if PAL or NTSC
     int x = 0x760;
@@ -114,7 +187,7 @@ void draw_update() {
 	int frameX = currentBuffer ? SCREEN_WIDTH : 0;
 	int frameY = 0;
 
-	DMAChain *chain  = &dmaChains[currentBuffer];
+	chain  = &dmaChains[currentBuffer];
 	currentBuffer = !currentBuffer;
 
 	uint32_t *ptr;
@@ -137,8 +210,7 @@ void draw_update() {
 
 	for(int i = 0; i < 100; i++) {
 		if(activeScene->objects[i] != nullptr) {
-			ptr = dma_allocate_packet(chain, 3);
-			activeScene->objects[i]->execute(ptr);
+			activeScene->objects[i]->execute();
 		}
 		else {
 			break;

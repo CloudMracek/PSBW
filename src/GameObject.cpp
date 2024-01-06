@@ -8,11 +8,11 @@ GameObject::GameObject(int x, int y, int z) {
     GameObject::position.z = z;
 }
 
-void GameObject::execute(uint32_t* ptr) {
+void GameObject::execute() {
     sio_print("x");
     for (int i = 0; i < 10; ++i) {
         if(components[i] != nullptr) {
-            components[i]->execute(this, ptr);
+            components[i]->execute(this);
         }
         else {
             break;

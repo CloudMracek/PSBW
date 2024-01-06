@@ -98,3 +98,7 @@ function(convertImage input bpp)
 	)
 endfunction()
 
+
+convertImage(assets/textures/pslib.png 16 game/tex_pslib.dat)
+addBinaryFile(game textureData "${PROJECT_BINARY_DIR}/game/tex_pslib.dat")
+

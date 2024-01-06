@@ -1,5 +1,5 @@
 #pragma once
-#include "GameObject.h"
+#include "psbw/GameObject.h"
 
 class Scene {
     public:
