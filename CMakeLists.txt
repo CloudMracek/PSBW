@@ -20,6 +20,9 @@ add_library(
 	lib/libc/misc.c
 	lib/libc/misc.s
 	lib/libc/string.c
+	lib/ps1/system.c
+	lib/ps1/system.s
+	lib/ps1/unhandledexc.c
 	lib/vendor/printf.c
 )
 
@@ -44,7 +47,7 @@ target_include_directories(
 )
 
 # Create the final executable of the engine and link common and game into it
-add_executable(${PROJECT_NAME} src/main.cpp src/sio.cpp src/draw.cpp src/GameObject.cpp src/Sprite.cpp src/manager.cpp src/Controller.cpp)
+add_executable(${PROJECT_NAME} src/main.cpp src/sio.cpp src/draw.cpp src/GameObject.cpp src/Sprite.cpp src/manager.cpp src/Controller.cpp src/Sound.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE game common)
 target_include_directories(${PROJECT_NAME} PUBLIC inc)
 
@@ -101,4 +104,6 @@ endfunction()
 
 convertImage(assets/textures/pslib.png 16 game/tex_pslib.dat)
 addBinaryFile(game textureData "${PROJECT_BINARY_DIR}/game/tex_pslib.dat")
+addBinaryFile(game soundData "${PROJECT_SOURCE_DIR}/assets/sounds/boing.vag")
+
 

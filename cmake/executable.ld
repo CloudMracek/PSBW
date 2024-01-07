@@ -22,6 +22,10 @@ MEMORY {
 	APP_RAM    (rwx) : ORIGIN = 0x80010000, LENGTH = 0x7f0000
 }
 
+__ram_top       = ORIGIN(APP_RAM) + LENGTH(APP_RAM);
+__sp            = __ram_top - 0x100;
+
+
 SECTIONS {
 	/* Code sections */
 

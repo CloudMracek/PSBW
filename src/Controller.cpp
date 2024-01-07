@@ -1,17 +1,6 @@
 #include "psbw/Controller.h"
 #include "ps1/registers.h"
-
-static void delay_microsec(int time) {
-	time *= (F_CPU + 1000000) / 2000000;
-
-	__asm__ volatile(
-		".set noreorder;"
-		"bgtz  %0, .;"
-		"addiu %0, -1;"
-		".set reorder;"
-		: "=r"(time) : "r"(time)
-	);
-}
+#include "ps1/system.h"
 
 void ctrl_init(void) {
 	// Reset the serial interface, initialize it with the settings used by
@@ -32,17 +21,9 @@ static bool ctrl_wait_acknowledge(int timeout) {
 	// interface to the interrupt controller. This is not guaranteed to happen
 	// (it will not if e.g. no device is connected), so we have to implement a
 	// timeout to avoid waiting forever in such cases.
-	for (; timeout > 0; timeout -= 10) {
-		if (IRQ_STAT & (1 << IRQ_SIO0)) {
-			// Reset the interrupt controller and serial interface's flags to
-			// ensure the interrupt can be triggered again.
-			IRQ_STAT     = ~(1 << IRQ_SIO0);
-			SIO_CTRL(0) |= SIO_CTRL_ACKNOWLEDGE;
-
-			return true;
-		}
-
-		delay_microsec(10);
+	if (waitForInterrupt(IRQ_SIO0, timeout)) {
+		SIO_CTRL(0) |= SIO_CTRL_ACKNOWLEDGE;
+		return true;
 	}
 
 	return false;
@@ -94,15 +75,16 @@ static uint8_t ctrl_exchange_byte(uint8_t value) {
 }
 
 static int ctrl_exchange_packet(
-	const uint8_t *request, uint8_t *response,
-	int reqLength, int maxRespLength
+	const uint8_t *request, uint8_t *response, int reqLength, int maxRespLength
 ) {
 	// Reset the interrupt flag and assert the DTR signal to tell the controller
 	// or memory card that we're about to send a packet. Devices may take some
 	// time to prepare for incoming bytes so we need a small delay here.
 	IRQ_STAT     = ~(1 << IRQ_SIO0);
 	SIO_CTRL(0) |= SIO_CTRL_DTR | SIO_CTRL_ACKNOWLEDGE;
-	delay_microsec(DTR_DELAY);
+	delayMicroseconds(DTR_DELAY);
+
+	int respLength = 0;
 
 	// Send the address byte and wait for the device to respond with a pulse on
 	// the DSR line. If no response is received assume no device is connected,
@@ -110,34 +92,33 @@ static int ctrl_exchange_packet(
 	// prepare for the actual packet transfer.
 	SIO_DATA(0) = 0x01;
 
-	if (!ctrl_wait_acknowledge(DSR_TIMEOUT))
-		return 0;
-	while (SIO_STAT(0) & SIO_STAT_RX_NOT_EMPTY)
-		SIO_DATA(0);
+	if (ctrl_wait_acknowledge(DSR_TIMEOUT)) {
+		while (SIO_STAT(0) & SIO_STAT_RX_NOT_EMPTY)
+			SIO_DATA(0);
 
-	int respLength = 0;
+		// Send and receive the packet simultaneously one byte at a time,
+		// padding it with zeroes if the packet we are receiving is longer than
+		// the data being sent.
+		while (respLength < maxRespLength) {
+			if (reqLength > 0) {
+				*(response++) = ctrl_exchange_byte(*(request++));
+				reqLength--;
+			} else {
+				*(response++) = ctrl_exchange_byte(0);
+			}
 
-	// Send and receive the packet simultaneously one byte at a time, padding it
-	// with zeroes if the packet we are receiving is longer than the data being
-	// sent.
-	while (respLength < maxRespLength) {
-		if (reqLength > 0) {
-			*(response++) = ctrl_exchange_byte(*(request++));
-			reqLength--;
-		} else {
-			*(response++) = ctrl_exchange_byte(0);
+			respLength++;
+
+			// The device will keep sending DSR pulses as long as there is more
+			// data to transfer. If no more pulses are received, terminate the
+			// transfer.
+			if (!ctrl_wait_acknowledge(DSR_TIMEOUT))
+				break;
 		}
-
-		respLength++;
-
-		// The device will keep sending DSR pulses as long as there is more data
-		// to transfer. If no more pulses are received, terminate the transfer.
-		if (!ctrl_wait_acknowledge(DSR_TIMEOUT))
-			break;
 	}
 
 	// Release DSR, allowing the device to go idle.
-	delay_microsec(DTR_DELAY);
+	delayMicroseconds(DTR_DELAY);
 	SIO_CTRL(0) &= ~SIO_CTRL_DTR;
 
 	return respLength;

@@ -387,13 +387,16 @@ typedef enum {
 	SPU_CTRL_ENABLE         = 1 << 15
 } SPUControlFlag;
 
-#define SPU_CH_VOL_L(N) _MMIO16((IO_BASE | 0xc00) + (16 * (N)))
-#define SPU_CH_VOL_R(N) _MMIO16((IO_BASE | 0xc02) + (16 * (N)))
-#define SPU_CH_FREQ(N)  _MMIO16((IO_BASE | 0xc04) + (16 * (N)))
-#define SPU_CH_ADDR(N)  _MMIO16((IO_BASE | 0xc06) + (16 * (N)))
-#define SPU_CH_ADSR1(N) _MMIO16((IO_BASE | 0xc08) + (16 * (N)))
-#define SPU_CH_ADSR2(N) _MMIO16((IO_BASE | 0xc0a) + (16 * (N)))
-#define SPU_CH_LOOP(N)  _MMIO16((IO_BASE | 0xc0e) + (16 * (N)))
+#define BUS_SPU_CFG			_MMIO32(IO_BASE | 0x1014)
+
+#define SPU_CH_VOL_L(N)    _MMIO16((IO_BASE | 0xc00) + (16 * (N)))
+#define SPU_CH_VOL_R(N)    _MMIO16((IO_BASE | 0xc02) + (16 * (N)))
+#define SPU_CH_FREQ(N)     _MMIO16((IO_BASE | 0xc04) + (16 * (N)))
+#define SPU_CH_ADDR(N)     _MMIO16((IO_BASE | 0xc06) + (16 * (N)))
+#define SPU_CH_ADSR1(N)    _MMIO16((IO_BASE | 0xc08) + (16 * (N)))
+#define SPU_CH_ADSR2(N)    _MMIO16((IO_BASE | 0xc0a) + (16 * (N)))
+#define SPU_CH_ADSR_VOL(N) _MMIO16((IO_BASE | 0xc0c) + (16 * (N)))
+#define SPU_CH_LOOP(N)     _MMIO16((IO_BASE | 0xc0e) + (16 * (N)))
 
 #define SPU_MASTER_VOL_L _MMIO16(IO_BASE | 0xd80)
 #define SPU_MASTER_VOL_R _MMIO16(IO_BASE | 0xd82)

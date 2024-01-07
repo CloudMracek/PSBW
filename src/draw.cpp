@@ -1,14 +1,15 @@
 #include <ps1/gpucmd.h>
 #include <ps1/registers.h>
-
+#include <ps1/system.h>
+#include <stdio.h>
 #include "psbw/draw.h"
 #include "psbw/Sprite.h"
 #include "psbw/GameObject.h"
 #include "psbw/Texture.h"
 #include "psbw/settings.h"
 
-
-#define DMA_MAX_CHUNK_SIZE 16
+// FIX: slower but fixes uploading textures whose size is not a multiple of 16 words
+#define DMA_MAX_CHUNK_SIZE 1
 #define CHAIN_BUFFER_SIZE 1024
 
 typedef struct {
@@ -68,13 +69,8 @@ uint32_t *dma_get_chain_pointer(int numCommands) {
 	return dma_allocate_packet(chain, numCommands);
 }
 
-static void dma_wait_done(void) {
-	while (DMA_CHCR(DMA_GPU) & DMA_CHCR_ENABLE)
-		__asm__ volatile("");
-}
-
 static void vram_send_data(const void *data, int x, int y, int width, int height) {
-	dma_wait_done();
+	waitForDMATransfer(DMA_GPU, 100000);
 
 	// Calculate how many 32-bit words will be sent from the width and height of
 	// the texture. If more than 16 words have to be sent, configure DMA to
@@ -118,7 +114,7 @@ void tex_upload(
 	// larger than 256x256 pixels.
 	// Upload the texture to VRAM and wait for the process to complete.
 	vram_send_data(data, x, y, width, height);
-	dma_wait_done();
+	waitForDMATransfer(DMA_GPU, 100000);
 	// Update the "texpage" attribute, a 16-bit field telling the GPU several
 	// details about the texture such as which 64x256 page it can be found in,
 	// its color depth and how semitransparent pixels shall be blended.
@@ -138,9 +134,6 @@ void gpu_setup(GP1VideoMode mode, int width, int height) {
 
 	DMA_DPCR |= DMA_DPCR_ENABLE << (DMA_GPU * 4);
 
-	GPU_GP1 = gp1_dmaRequestMode(GP1_DREQ_GP0_WRITE);
-	GPU_GP1 = gp1_dispBlank(false);
-
 
     // Origin of framebuffer based on if PAL or NTSC
     int x = 0x760;
@@ -159,6 +152,9 @@ void gpu_setup(GP1VideoMode mode, int width, int height) {
 	GPU_GP1 = gp1_fbMode(
 		horizontalRes, verticalRes, mode, false, GP1_COLOR_16BPP
 	);
+
+	GPU_GP1 = gp1_dmaRequestMode(GP1_DREQ_GP0_WRITE);
+	GPU_GP1 = gp1_dispBlank(false);
 
 }
 

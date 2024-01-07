@@ -6,6 +6,8 @@
 #include <psbw/Sprite.h>
 #include <psbw/Texture.h>
 #include <psbw/Controller.h>
+#include <psbw/Sound.h>
+
 #include <vendor/printf.h>
 
 #include "game/game.h"
@@ -15,8 +17,10 @@ GameObject* gameObject1;
 Sprite* sprite1;
 Texture* texture1;
 Controller* controller1;
+Sound* sound1;
 
 extern const uint8_t textureData[];
+extern const uint8_t soundData[];
 
 // Define DVD screensaver speed
 int SPEED_X = 2;
@@ -28,7 +32,7 @@ void game_setup() {
     sprite1 = new Sprite(SPRITE_TYPE_TEXTURED);
     texture1 = new Texture();
     controller1 = new Controller(CONTROLLER_PORT_1);
-    
+    sound1 = new Sound(soundData);
 
     psbw_upload_texture(texture1, textureData, SCREEN_WIDTH * 2, 0, 64, 64);
 
@@ -43,11 +47,12 @@ void game_setup() {
     gameObject1->position.x = 0;
     gameObject1->position.y = 0;
 
+
     psbw_load_scene(scene1);
 }
 
 void game_loop() {
-    
+
     if(controller1->GetButton(X)) {
         sprite1->Type = SPRITE_TYPE_FLAT_COLOR;
     }
@@ -62,10 +67,12 @@ void game_loop() {
     // Bounce off the walls
     if (gameObject1->position.x <= 0 || gameObject1->position.x + sprite1->Width >= SCREEN_WIDTH) {
         SPEED_X = -SPEED_X;
+        sound1->play();
     }
 
     if (gameObject1->position.y <= 0 || gameObject1->position.y + sprite1->Height >= SCREEN_HEIGHT) {
         SPEED_Y = -SPEED_Y;
+        sound1->play();
     }
 
 }
