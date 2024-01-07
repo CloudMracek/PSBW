@@ -1,10 +1,12 @@
 #include "game/game.h"
 #include "psbw/draw.h"
 #include "psbw/sio.h"
+#include "psbw/Controller.h"
 
 void main() {
 	sio_init(SIO_BAUD_115200);
 	draw_init();
+	ctrl_init();
 	game_setup();
 
 	for(;;) {

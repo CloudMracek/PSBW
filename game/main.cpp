@@ -5,6 +5,8 @@
 #include <psbw/GameObject.h>
 #include <psbw/Sprite.h>
 #include <psbw/Texture.h>
+#include <psbw/Controller.h>
+#include <vendor/printf.h>
 
 #include "game/game.h"
 
@@ -12,6 +14,7 @@ Scene* scene1;
 GameObject* gameObject1;
 Sprite* sprite1;
 Texture* texture1;
+Controller* controller1;
 
 extern const uint8_t textureData[];
 
@@ -24,6 +27,7 @@ void game_setup() {
     gameObject1 = new GameObject(100, 100, 100);
     sprite1 = new Sprite(SPRITE_TYPE_TEXTURED);
     texture1 = new Texture();
+    controller1 = new Controller(CONTROLLER_PORT_1);
     
 
     psbw_upload_texture(texture1, textureData, SCREEN_WIDTH * 2, 0, 64, 64);
@@ -43,6 +47,14 @@ void game_setup() {
 }
 
 void game_loop() {
+    
+    if(controller1->GetButton(X)) {
+        sprite1->Type = SPRITE_TYPE_FLAT_COLOR;
+    }
+    else {
+        sprite1->Type = SPRITE_TYPE_TEXTURED;
+    }
+
     // Move the game object
     gameObject1->position.x += SPEED_X;
     gameObject1->position.y += SPEED_Y;

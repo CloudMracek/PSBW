@@ -1,5 +1,4 @@
 #include "psbw/GameObject.h"
-#include "psbw/sio.h"
 #include <cstdint>
 
 GameObject::GameObject(int x, int y, int z) {
@@ -9,7 +8,6 @@ GameObject::GameObject(int x, int y, int z) {
 }
 
 void GameObject::execute() {
-    sio_print("x");
     for (int i = 0; i < 10; ++i) {
         if(components[i] != nullptr) {
             components[i]->execute(this);

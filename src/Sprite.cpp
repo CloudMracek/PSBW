@@ -29,8 +29,8 @@ Sprite::Sprite(SpriteType type) {
     Color.y = 255;
     Color.z = 255;
 
-    Width = 50;
-    Height = 50;
+    Width = 64;
+    Height = 64;
 
     Type = type;
 }

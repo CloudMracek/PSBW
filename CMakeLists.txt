@@ -44,7 +44,7 @@ target_include_directories(
 )
 
 # Create the final executable of the engine and link common and game into it
-add_executable(${PROJECT_NAME} src/main.cpp src/sio.cpp src/draw.cpp src/GameObject.cpp src/Sprite.cpp src/manager.cpp)
+add_executable(${PROJECT_NAME} src/main.cpp src/sio.cpp src/draw.cpp src/GameObject.cpp src/Sprite.cpp src/manager.cpp src/Controller.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE game common)
 target_include_directories(${PROJECT_NAME} PUBLIC inc)
 
