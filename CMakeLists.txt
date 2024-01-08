@@ -10,8 +10,11 @@ project(
 
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 
-set(
-	PSN00BSDK_TOOLS
+set(GAME_NAME game)
+
+configure_file(
+    "${PROJECT_SOURCE_DIR}/system.cnf"
+    "${PROJECT_BINARY_DIR}/system.cnf"
 )
 
 # Create common library which contains things like CPP support and libc
@@ -39,12 +42,12 @@ target_include_directories(
 
 # Create the Game library which contains the actual game code
 add_library(
-	game OBJECT
+	${GAME_NAME} OBJECT
 	game/main.cpp
 )
 
 target_include_directories(
-	game PUBLIC
+	${GAME_NAME} PUBLIC
 	lib
 	inc
 	lib/libc
@@ -52,16 +55,16 @@ target_include_directories(
 
 # Create the final executable of the engine and link common and game into it
 add_executable(${PROJECT_NAME} src/main.cpp src/sio.cpp src/draw.cpp src/GameObject.cpp src/Sprite.cpp src/manager.cpp src/Controller.cpp src/Sound.cpp)
-target_link_libraries(${PROJECT_NAME} PRIVATE game common)
+target_link_libraries(${PROJECT_NAME} PRIVATE ${GAME_NAME} common)
 target_include_directories(${PROJECT_NAME} PUBLIC inc)
 
 # The final executable requires conversion to be ran on the PSX
 add_custom_command(
 	TARGET     ${PROJECT_NAME} POST_BUILD
-	BYPRODUCTS ${PROJECT_NAME}.psexe
+	BYPRODUCTS ${GAME_NAME}.psexe
 	COMMAND
 		"${Python3_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/tools/convertExecutable.py"
-		"$<TARGET_FILE:${PROJECT_NAME}>" ${PROJECT_NAME}.psexe
+		"$<TARGET_FILE:${PROJECT_NAME}>" ${GAME_NAME}.psexe
 	VERBATIM
 )
 
@@ -142,13 +145,13 @@ ExternalProject_Add(
 
 psn00bsdk_add_cd_image(
 	iso      # Target name
-	psbw 	 # Output file name (= template.bin + template.cue)
+	${GAME_NAME} # Output file name (= template.bin + template.cue)
 	iso.xml  # Path to config file
 	DEPENDS psbw system.cnf mkpsxiso
 )
 
-convertImage(assets/textures/pslib.png 16 game/tex_pslib.dat)
-addBinaryFile(game textureData "${PROJECT_BINARY_DIR}/game/tex_pslib.dat")
-addBinaryFile(game soundData "${PROJECT_SOURCE_DIR}/assets/sounds/boing.vag")
+convertImage(assets/textures/pslib.png 16 ${GAME_NAME}/tex_pslib.dat)
+addBinaryFile(${GAME_NAME} textureData "${PROJECT_BINARY_DIR}/${GAME_NAME}/tex_pslib.dat")
+addBinaryFile(${GAME_NAME} soundData "${PROJECT_SOURCE_DIR}/assets/sounds/boing.vag")
 
 

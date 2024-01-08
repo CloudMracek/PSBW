@@ -12,8 +12,8 @@
 		/>
 
 		<directory_tree>
-			<file name="SYSTEM.CNF"		type="data" source="${PROJECT_SOURCE_DIR}/system.cnf" />
-			<file name="PSBW.EXE"	type="data" source="psbw.psexe" />
+			<file name="SYSTEM.CNF"		type="data" source="${PROJECT_BINARY_DIR}/system.cnf" />
+			<file name="${GAME_NAME}.EXE"	type="data" source="${GAME_NAME}.psexe" />
 
 			<dummy sectors="1024"/>
 		</directory_tree>
