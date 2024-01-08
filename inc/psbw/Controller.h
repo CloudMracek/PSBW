@@ -1,12 +1,13 @@
 #pragma once
 
 #include <stdint.h>
-
 typedef uint8_t ControllerPort;
 
 #define CONTROLLER_PORT_1 0
 #define CONTROLLER_PORT_2 1
 
+
+// An enum that defines all the available buttons
 enum ControllerButton {
     Select =            0x1,            // Bit 0
     L3 =                0x1 << 1,       // Bit 1
@@ -26,13 +27,16 @@ enum ControllerButton {
     Square =            0x1 << 15       // Bit 15
 };
 
-
+// Initialize SIO0 for controllers. DO NOT RUN FROM GAME CODE. Managed by engine.
 void ctrl_init();
 
+
+// Controller class
 class Controller {
     public:
         ControllerPort port;
         
+        // Initialize controller with selected port
         Controller(ControllerPort controllerPort);
 
         // Gets current status of a selected button. Returns 1 if pressed, 0 if not

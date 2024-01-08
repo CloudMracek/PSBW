@@ -10,9 +10,12 @@ typedef char SpriteType;
 class Sprite : public Component {
     public:
 
+        // Creates a sprite component with the selected type
         Sprite(SpriteType type);
-        Sprite(SpriteType type, Texture* texture);
 
+        // Creates a sprite component with the selected type and assigns a texture
+        Sprite(SpriteType type, Texture* texture);
+        
         int Width, Height;
         Vector3D Color;
         SpriteType Type;
