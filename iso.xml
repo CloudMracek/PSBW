@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<iso_project>
+	<track type="data">
+		<identifiers
+			system			="PLAYSTATION"
+			volume			="PSBW"
+			volume_set		="PSBW"
+			publisher		="PSLIB/BANDWIDTH"
+			data_preparer	="PSBW"
+			application		="PLAYSTATION"
+			copyright		="README.TXT;1"
+		/>
+
+		<directory_tree>
+			<file name="SYSTEM.CNF"		type="data" source="${PROJECT_SOURCE_DIR}/system.cnf" />
+			<file name="PSBW.EXE"	type="data" source="psbw.psexe" />
+
+			<dummy sectors="1024"/>
+		</directory_tree>
+	</track>
+	<!--<track type="audio" source="${PROJECT_SOURCE_DIR}/track2.wav" />-->
+</iso_project>

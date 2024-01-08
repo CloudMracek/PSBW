@@ -10,6 +10,10 @@ project(
 
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 
+set(
+	PSN00BSDK_TOOLS
+)
+
 # Create common library which contains things like CPP support and libc
 add_library(
 	common OBJECT
@@ -101,6 +105,47 @@ function(convertImage input bpp)
 	)
 endfunction()
 
+function(psn00bsdk_add_cd_image name image_name config_file)
+	set(MKPSXISO ${PROJECT_BINARY_DIR}/tree/bin/mkpsxiso)
+	cmake_path(HASH config_file _hash)
+
+	set(_xml_file ${CMAKE_CURRENT_BINARY_DIR}/cd_image_${_hash}.xml)
+	configure_file("${config_file}" ${_xml_file})
+
+	add_custom_command(
+		OUTPUT ${image_name}.bin ${image_name}.cue
+		COMMAND
+			${MKPSXISO} -y
+			-o ${image_name}.bin -c ${image_name}.cue ${_xml_file}
+		COMMENT "Building CD image ${image_name}"
+		VERBATIM
+		${ARGN}
+	)
+	add_custom_target(
+		${name} ALL
+		DEPENDS
+			${CMAKE_CURRENT_BINARY_DIR}/${image_name}.bin
+			${CMAKE_CURRENT_BINARY_DIR}/${image_name}.cue
+	)
+endfunction()
+
+
+##SUB
+include(ExternalProject)
+ExternalProject_Add(
+	mkpsxiso
+	PREFIX subprojects
+	SOURCE_DIR ${PROJECT_SOURCE_DIR}/tools/mkpsxiso
+	INSTALL_DIR tree
+	CMAKE_CACHE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${PROJECT_BINARY_DIR}/tree
+)
+
+psn00bsdk_add_cd_image(
+	iso      # Target name
+	psbw 	 # Output file name (= template.bin + template.cue)
+	iso.xml  # Path to config file
+	DEPENDS psbw system.cnf mkpsxiso
+)
 
 convertImage(assets/textures/pslib.png 16 game/tex_pslib.dat)
 addBinaryFile(game textureData "${PROJECT_BINARY_DIR}/game/tex_pslib.dat")
