@@ -18,5 +18,5 @@
 			<dummy sectors="1024"/>
 		</directory_tree>
 	</track>
-	<!--<track type="audio" source="${PROJECT_SOURCE_DIR}/track2.wav" />-->
+	${audio_tracks}
 </iso_project>

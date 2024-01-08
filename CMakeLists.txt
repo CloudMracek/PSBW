@@ -12,6 +12,19 @@ find_package(Python3 REQUIRED COMPONENTS Interpreter)
 
 set(GAME_NAME game)
 
+file(GLOB audio_files "${PROJECT_SOURCE_DIR}/assets/music/*.wav")
+
+set(audio_tracks "")
+foreach(audio_file IN LISTS audio_files)
+    get_filename_component(audio_filename ${audio_file} NAME)
+    set(audio_tracks "${audio_tracks}\n<track type=\"audio\" source=\"${audio_file}\" />")
+endforeach()
+
+configure_file(
+	"${PROJECT_SOURCE_DIR}/iso.xml"
+	"${PROJECT_BINARY_DIR}/iso.xml"
+)
+
 configure_file(
     "${PROJECT_SOURCE_DIR}/system.cnf"
     "${PROJECT_BINARY_DIR}/system.cnf"
@@ -112,14 +125,11 @@ function(psn00bsdk_add_cd_image name image_name config_file)
 	set(MKPSXISO ${PROJECT_BINARY_DIR}/tree/bin/mkpsxiso)
 	cmake_path(HASH config_file _hash)
 
-	set(_xml_file ${CMAKE_CURRENT_BINARY_DIR}/cd_image_${_hash}.xml)
-	configure_file("${config_file}" ${_xml_file})
-
 	add_custom_command(
 		OUTPUT ${image_name}.bin ${image_name}.cue
 		COMMAND
 			${MKPSXISO} -y
-			-o ${image_name}.bin -c ${image_name}.cue ${_xml_file}
+			-o ${image_name}.bin -c ${image_name}.cue ${PROJECT_BINARY_DIR}/iso.xml
 		COMMENT "Building CD image ${image_name}"
 		VERBATIM
 		${ARGN}
