@@ -10,7 +10,7 @@ You can install the toolchain from the [pcsx-redux](https://github.com/spicyjpeg
 ```
 powershell -c "& { iwr -UseBasicParsing https://raw.githubusercontent.com/grumpycoders/pcsx-redux/main/mips.ps1 | iex }"
 ```
-A reboot might be possibly needed
+A reboot might be needed
 ```
 mips install 13.2.0
 ```
@@ -39,3 +39,11 @@ cmake --build ./build
 doxygen Doxyfile
 ```
 
+## How to run
+If you have a PSX you can either burn a CD with the output bin/cue files or upload it directly to the PSX using a serial link cable.
+
+Or you can use an emulator like [pcsx-redux](https://github.com/grumpycoders/pcsx-redux)
+
+# Thanks
+Thanks to [spicyjpeg](https://github.com/spicyjpeg/) who is the author of the register header files and who's been extemely helpful with debugging some complex issues
+More thanks goes to [Nicolas Noble](https://github.com/nicolasnoble) who's intelligence is beyond my comprehension keeps wasting his time to help me solve trivial issues. <3
