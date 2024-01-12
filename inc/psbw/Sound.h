@@ -3,13 +3,23 @@
 void spu_init();
 void spu_play_sample(int addr, int sample_rate);
 
+/**
+ * \class Sound
+ * \brief A single sound file whhich can be played
+ *
+ *
+ */
 class Sound {
     public:
 
-        // Uploads specified VAG data into SPU RAM. VAGi not supported.
+        /**
+         * \brief Uploads specified VAG data into SPU RAM. VAGi not supported.
+        */
         Sound(const void *data);
 
-        // Plays the selected file. Loops if Loop flag is set in VAG file
+        /**
+         * \brief Play's the selected file. Loops if Loop flag is set in VAG file
+        */
         void play();
 
         

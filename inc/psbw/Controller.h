@@ -7,7 +7,10 @@ typedef uint8_t ControllerPort;
 #define CONTROLLER_PORT_2 1
 
 
-// An enum that defines all the available buttons
+/**
+ * \class ControllerButton
+ * \brief Use this struct to select a controller button
+ */
 enum ControllerButton {
     Select =            0x1,            // Bit 0
     L3 =                0x1 << 1,       // Bit 1
@@ -31,7 +34,12 @@ enum ControllerButton {
 void ctrl_init();
 
 
-// Controller class
+/**
+ * \class Controller
+ * \brief This class allows you to access input data from a Controller of your choice
+ *
+ *
+ */
 class Controller {
     public:
         ControllerPort port;
@@ -39,7 +47,9 @@ class Controller {
         // Initialize controller with selected port
         Controller(ControllerPort controllerPort);
 
-        // Gets current status of a selected button. Returns 1 if pressed, 0 if not
-        int8_t GetButton(ControllerButton button);
+/**
+ * \brief Returns 1 if the selected button is pressed. 0 if otherwise
+ */        
+int8_t GetButton(ControllerButton button);
 
 };

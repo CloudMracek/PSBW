@@ -7,13 +7,24 @@
 
 typedef char SpriteType;
 
+
+/**
+ * \class Sprite
+ * \brief Add this component to your GameObject class to render a sprite
+ *
+ *
+ */
 class Sprite : public Component {
     public:
 
-        // Creates a sprite component with the selected type
+        /**
+         * \brief Creates a sprite component with the selected type
+        */
         Sprite(SpriteType type);
 
-        // Creates a sprite component with the selected type and assigns a texture
+        /**
+         * \brief Creates a sprite component with the selected type and assigns a texture
+         */
         Sprite(SpriteType type, Texture* texture);
         
         int Width, Height;
@@ -21,6 +32,9 @@ class Sprite : public Component {
         SpriteType Type;
         Texture* tex;
 
+        /**
+         * \brief Do not use - Handled by engine
+         */
         void execute(GameObject* parent) override;
     
     private:

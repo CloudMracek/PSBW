@@ -1,3 +1,5 @@
 build/
 .vscode/
 *.dat
+html/
+latex/

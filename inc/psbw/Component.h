@@ -3,7 +3,12 @@
 class GameObject;
 
 
-// An interface class that masks components that are added to GameObjects
+/**
+ * \class Component
+ * \brief An Interface class which serves to add Components to GameObject
+ *
+ * Do not use in your code. This in only an Interface class which parents component classes like Sprite
+ */
 class Component {
 public:
     // Run function of selected component. Managed by engine. DO NOT RUN IN GAME CODE!
