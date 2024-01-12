@@ -24,7 +24,7 @@ mips install 13.2.0
 ```
 
 ### Get the toolchain on Linux
-You can spawn it from source using this [compile script](https://github.com/grumpycoders/pcsx-redux/blob/main/tools/linux-mips/spawn-compiler.sh)
+You can spawn it from source using this [compile script](https://github.com/grumpycoders/pcsx-redux/blob/main/tools/linux-mips/spawn-compiler.sh) by pcsx-redux
 ```
 chmod +x spawn-compiler.sh
 sudo ./spawn-compiler.sh
@@ -39,7 +39,7 @@ pip3 install -r tools/requirements.txt        # Linux/macOS
 ### Windows specific requirements
 If you're on Windows you will need to download [mkpsxiso](https://github.com/Lameguy64/mkpsxiso/releases) and ensure it's in your PATH
 
-This projects builds it's own mkpsxiso from source on Linux
+This projects builds its own mkpsxiso from source on Linux
 
 ### Build
 ```
