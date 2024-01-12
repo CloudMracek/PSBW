@@ -122,7 +122,12 @@ function(convertImage input bpp)
 endfunction()
 
 function(psn00bsdk_add_cd_image name image_name config_file)
+	if (CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
+	set(MKPSXISO mkpsxiso.exe)
+	ELSE()
 	set(MKPSXISO ${PROJECT_BINARY_DIR}/tree/bin/mkpsxiso)
+	ENDIF()
+	
 	cmake_path(HASH config_file _hash)
 
 	add_custom_command(
@@ -143,22 +148,35 @@ function(psn00bsdk_add_cd_image name image_name config_file)
 endfunction()
 
 
-##SUB
-include(ExternalProject)
-ExternalProject_Add(
-	mkpsxiso
-	PREFIX subprojects
-	SOURCE_DIR ${PROJECT_SOURCE_DIR}/tools/mkpsxiso
-	INSTALL_DIR tree
-	CMAKE_CACHE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${PROJECT_BINARY_DIR}/tree
-)
 
-psn00bsdk_add_cd_image(
-	iso      # Target name
-	${GAME_NAME} # Output file name (= template.bin + template.cue)
-	iso.xml  # Path to config file
-	DEPENDS psbw system.cnf mkpsxiso
-)
+
+if (NOT CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
+	include(ExternalProject)
+    ExternalProject_Add(
+        mkpsxiso
+        PREFIX subprojects
+        SOURCE_DIR ${PROJECT_SOURCE_DIR}/tools/mkpsxiso
+        INSTALL_DIR tree
+        CMAKE_CACHE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${PROJECT_BINARY_DIR}/tree
+    )
+ENDIF()
+
+if (CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
+    psn00bsdk_add_cd_image(
+        iso      # Target name
+        ${GAME_NAME} # Output file name (= template.bin + template.cue)
+        iso.xml  # Path to config file
+        DEPENDS psbw system.cnf
+    )
+ELSE()
+    psn00bsdk_add_cd_image(
+        iso      # Target name
+        ${GAME_NAME} # Output file name (= template.bin + template.cue)
+        iso.xml  # Path to config file
+        DEPENDS psbw system.cnf mkpsxiso
+    )
+ENDIF()
+
 
 convertImage(assets/textures/pslib.png 16 ${GAME_NAME}/tex_pslib.dat)
 addBinaryFile(${GAME_NAME} textureData "${PROJECT_BINARY_DIR}/${GAME_NAME}/tex_pslib.dat")
