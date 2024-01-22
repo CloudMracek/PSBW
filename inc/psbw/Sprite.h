@@ -11,8 +11,6 @@ typedef char SpriteType;
 /**
  * \class Sprite
  * \brief Add this component to your GameObject class to render a sprite
- *
- *
  */
 class Sprite : public Component {
     public:

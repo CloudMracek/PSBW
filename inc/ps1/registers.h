@@ -145,7 +145,7 @@ typedef enum {
 
 #define DRAM_CTRL _MMIO32(IO_BASE | 0x060)
 
-/* IRQ controller */
+
 
 typedef enum {
 	IRQ_VSYNC  =  0,
@@ -164,6 +164,7 @@ typedef enum {
 
 #define IRQ_STAT _MMIO16(IO_BASE | 0x070)
 #define IRQ_MASK _MMIO16(IO_BASE | 0x074)
+#define BUS_COM_DELAY _MMIO32(IO_BASE | 0x1020)
 
 /* DMA */
 
@@ -388,6 +389,7 @@ typedef enum {
 } SPUControlFlag;
 
 #define BUS_SPU_CFG			_MMIO32(IO_BASE | 0x1014)
+#define BUS_CD_CFG			_MMIO32(IO_BASE | 0x1018)
 
 #define SPU_CH_VOL_L(N)    _MMIO16((IO_BASE | 0xc00) + (16 * (N)))
 #define SPU_CH_VOL_R(N)    _MMIO16((IO_BASE | 0xc02) + (16 * (N)))

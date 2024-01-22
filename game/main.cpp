@@ -45,6 +45,8 @@ void game_setup() {
     scene1->objects[0] = gameObject1;
 
     psbw_load_scene(scene1);
+
+    sound_play_cdda(2, 1);
 }
 
 void game_loop() {
@@ -63,12 +65,12 @@ void game_loop() {
     // Bounce off the walls
     if (gameObject1->position.x <= 0 || gameObject1->position.x + sprite1->Width >= SCREEN_WIDTH) {
         SPEED_X = -SPEED_X;
-        sound1->play();
+        //sound1->play();
     }
 
     if (gameObject1->position.y <= 0 || gameObject1->position.y + sprite1->Height >= SCREEN_HEIGHT) {
         SPEED_Y = -SPEED_Y;
-        sound1->play();
+        //sound1->play();
     }
 
 }
