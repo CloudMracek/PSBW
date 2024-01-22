@@ -1,6 +1,14 @@
 #pragma once
 
 void spu_init();
+
+
+/// @brief Plays an audio track from the CDROM
+void sound_play_cdda(int track, int loop);
+
+/// @brief Stops CDROM audio playback
+void sound_stop_cdda();
+
 void spu_play_sample(int addr, int sample_rate);
 
 /**
