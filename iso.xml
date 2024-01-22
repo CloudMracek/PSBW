@@ -3,10 +3,10 @@
 	<track type="data">
 		<identifiers
 			system			="PLAYSTATION"
-			volume			="PSBW"
-			volume_set		="PSBW"
+			volume			="${GAME_NAME}"
+			volume_set		="${GAME_NAME}"
 			publisher		="PSLIB/BANDWIDTH"
-			data_preparer	="PSBW"
+			data_preparer	="${GAME_NAME}"
 			application		="PLAYSTATION"
 			copyright		="README.TXT;1"
 		/>

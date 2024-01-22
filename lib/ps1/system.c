@@ -158,3 +158,4 @@ void switchThread(Thread *thread) {
 	nextThread = thread;
 	atomic_signal_fence(memory_order_release);
 }
+

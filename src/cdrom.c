@@ -1,6 +1,5 @@
 #include "ps1/registers.h"
 #include "ps1/system.h"
-#include "psbw/interrupts.h"
 #include "psbw/cdrom.h"
 
 #define CD_ACK_TIMEOUT 0x100000
@@ -365,8 +364,6 @@ int CdInit(void)
 	enableInterrupts();
 
 	BUS_CD_CFG = 0x00020943;
-
-	SetDMAPriority(DMA_CDROM, 3);
 	DMA_CHCR(DMA_CDROM) = 0x00000000; // Stop DMA
 
 	CDROM_REG(0) = 1;

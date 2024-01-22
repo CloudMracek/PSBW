@@ -13,8 +13,7 @@ extern "C" {
 
 
 void main() {
-	// Uncomment to install custom interrupt handler (see inc/ps1/system.h)
-	//installExceptionHandler();
+	installExceptionHandler();
 
 	sio_init(SIO_BAUD_115200);
 	draw_init();
