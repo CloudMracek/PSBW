@@ -63,12 +63,12 @@ void game_loop() {
     // Bounce off the walls
     if (gameObject1->position.x <= 0 || gameObject1->position.x + sprite1->Width >= SCREEN_WIDTH) {
         SPEED_X = -SPEED_X;
-        sound1->play();
+        //sound1->play();
     }
 
     if (gameObject1->position.y <= 0 || gameObject1->position.y + sprite1->Height >= SCREEN_HEIGHT) {
         SPEED_Y = -SPEED_Y;
-        sound1->play();
+        //sound1->play();
     }
 
 }
