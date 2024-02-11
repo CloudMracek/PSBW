@@ -2,9 +2,12 @@
 #include "psbw/Scene.h"
 #include "psbw/Texture.h"
 
+int VSync(int mode);
+
 class Scene;
 
 void load_scene(Scene* scene);
+
 
 void draw_init();
 void draw_update();

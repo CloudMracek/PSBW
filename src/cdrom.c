@@ -6,25 +6,9 @@
 #define CD_SYNC_TIMEOUT 0x100000
 #define MAX_RESULT_SIZE 32
 
+volatile int _cd_media_changed;
+
 uint8_t cdda_loop, cdda_current_track = 0;
-
-typedef enum
-{
-	CdlNoIntr = 0,		// No pending interrupt
-	CdlDataReady = 1,	// INT1 (new sector or CD-DA report packet available)
-	CdlComplete = 2,	// INT2 ("complete" response received, blocking command has finished)
-	CdlAcknowledge = 3, // INT3 ("acknowledge" response received, non-blocking command has finished or blocking command has started)
-	CdlDataEnd = 4,		// INT4 (end of track or end of disc reached)
-	CdlDiskError = 5	// INT5 (command error, read error or lid opened)
-} CdlIntrResult;
-
-typedef struct
-{
-	uint8_t minute; // Minutes (BCD)
-	uint8_t second; // Seconds (BCD)
-	uint8_t sector; // Sector or frame (BCD)
-	uint8_t track;	// Track number
-} CdlLOC;
 
 typedef struct
 {
@@ -395,6 +379,84 @@ int CdInit(void)
 	return 1;
 }
 
+
+int CdControlF(CdlCommand cmd, const void *param) {
+	// Assume no parameters need to be passed if the command is unknown.
+	uint8_t flags = (cmd <= CdlReadTOC) ? _command_flags[cmd] : 0;
+	int length;
+
+	if (flags & OPTIONAL) {
+		// The command may optionally take a parameter.
+		length = param ? (flags & 3) : 0;
+	} else if (flags & SETLOC) {
+		// The command takes no parameter, but the API allows specifying a
+		// location to be sent to the drive as a separate CdlSetloc command.
+		length = 0;
+		if (param)
+			CdCommandF(CdlSetloc, param, 3);
+	} else {
+		// The command takes a mandatory parameter or no parameter.
+		length = flags & 3;
+		if (length && !param) {
+			return -1;
+		}
+	}
+
+	return CdCommandF(cmd, param, length);
+}
+
+int CdControl(CdlCommand cmd, const void *param, uint8_t *result) {
+	/*if (_ack_pending) {
+		_sdk_log("CdControl(0x%02x) failed, drive busy\n", cmd);
+		return 0;
+	}*/
+
+	_result_ptr = result;
+	CdControlF(cmd, param);
+
+	// Wait for the command to be acknowledged.
+	for (int i = CD_ACK_TIMEOUT; i; i--) {
+		if (!_ack_pending)
+			return 1;
+	}
+
+	return 0;
+}
+
+int CdControlB(CdlCommand cmd, const void *param, uint8_t *result) {
+	int error = CdControl(cmd, param, result);
+	if (error != 1)
+		return error;
+
+	error = CdSync(0, 0);
+	return (error == CdlDiskError) ? 0 : 1;
+}
+
+int CdStatus(void) {
+	return _last_status;
+}
+
+const CdlLOC *CdLastPos(void) {
+	return &_last_pos;
+}
+
+CdlLOC *CdIntToPos(int i, CdlLOC *p) {
+	i += 150;
+
+	p->minute = itob(i / (75 * 60));
+	p->second = itob((i / 75) % 60);
+	p->sector = itob(i % 75);
+	return p;
+}
+
+int CdPosToInt(const CdlLOC *p) {	
+	return (
+		(btoi(p->minute) * (75 * 60)) +
+		(btoi(p->second) * 75) +
+		btoi(p->sector)
+	) - 150;
+}
+
 void CdPlayCdda(int track, int loop)
 {
 	cdda_loop = loop;
@@ -410,3 +472,4 @@ void CdStopCdda()
 	cdda_current_track = 0;
 	CdCommand(CdlPause, 0, 0, 0);
 }
+

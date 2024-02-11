@@ -7,6 +7,7 @@
 #include <psbw/Texture.h>
 #include <psbw/Controller.h>
 #include <psbw/Sound.h>
+#include <psbw/filesystem.h>
 
 #include <vendor/printf.h>
 
@@ -18,6 +19,8 @@ Sprite* sprite1;
 Texture* texture1;
 Controller* controller1;
 Sound* sound1;
+
+CdlFILE file;
 
 extern const uint8_t textureData[];
 extern const uint8_t soundData[];
@@ -45,6 +48,8 @@ void game_setup() {
     scene1->objects[0] = gameObject1;
 
     psbw_load_scene(scene1);
+
+    CdSearchFile(&file, "\\SYSTEM.CNF");
 
     sound_play_cdda(2, 1);
 }
