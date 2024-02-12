@@ -1,9 +1,6 @@
 #pragma once
 #include "psbw/cdrom.h"
 
-
-typedef void (*CdlCB)(CdlIntrResult, uint8_t *);
-
 /// Structure of a double-endian unsigned short word
 typedef struct ISO_USHORT_PAIR
 {
