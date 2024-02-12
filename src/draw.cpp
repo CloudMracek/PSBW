@@ -219,7 +219,7 @@ void draw_update() {
 
 	*(chain->nextPacket) = gp0_endTag(0);
 	gpu_gp0_wait_ready();
-	//gpu_wait_vsync();
+	VSync(0);
 	dma_send_linked_list(chain->data);
 }
 

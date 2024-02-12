@@ -337,7 +337,6 @@ static void _cd_irq_handler(void)
 int CdInit(void)
 {	
 	interrupt_install_callback(IRQ_CDROM, &_cd_irq_handler);
-
 	BUS_CD_CFG = 0x00020943;
 	DMA_CHCR(DMA_CDROM) = 0x00000000; // Stop DMA
 

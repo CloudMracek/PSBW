@@ -27,12 +27,12 @@ void interrupt_install_callback(IRQChannel channel, void (*cb)(void)) {
     {
     case IRQ_CDROM:
         cdCallback = cb;
-        IRQ_MASK = 1 << IRQ_CDROM;
+        IRQ_MASK |= 1 << IRQ_CDROM;
         break;
     
     case IRQ_VSYNC:
         vsyncCallback = cb;
-        IRQ_MASK = 1 << IRQ_VSYNC;
+        IRQ_MASK |= 1 << IRQ_VSYNC;
         break;
     default:
         break;
