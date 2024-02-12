@@ -1,8 +1,6 @@
 #pragma once
+#include "psbw/cdrom.h"
 
-extern "C" {
-	#include "psbw/cdrom.h"
-}
 
 typedef void (*CdlCB)(CdlIntrResult, uint8_t *);
 

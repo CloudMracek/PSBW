@@ -1,6 +1,7 @@
 #include "ps1/registers.h"
 #include "ps1/system.h"
 #include "psbw/cdrom.h"
+#include "psbw/interrupts.h"
 
 #define CD_ACK_TIMEOUT 0x100000
 #define CD_SYNC_TIMEOUT 0x100000
@@ -333,19 +334,9 @@ static void _cd_irq_handler(void)
 	_result_ptr = (uint8_t *)0;
 }
 
-void cdInterruptHandler(void)
-{
-	if (acknowledgeInterrupt(IRQ_CDROM))
-		_cd_irq_handler();
-}
-
 int CdInit(void)
-{
-	installExceptionHandler();
-	setInterruptHandler(cdInterruptHandler, ((void *)0));
-
-	IRQ_MASK = 1 << IRQ_CDROM;
-	enableInterrupts();
+{	
+	interrupt_install_callback(IRQ_CDROM, &_cd_irq_handler);
 
 	BUS_CD_CFG = 0x00020943;
 	DMA_CHCR(DMA_CDROM) = 0x00000000; // Stop DMA

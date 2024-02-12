@@ -1,5 +1,5 @@
 #include "psbw/filesystem.h"
-#include "psbw/draw.h"
+#include "psbw/vsync.h"
 #include "ps1/system.h"
 #include "string.h"
 #include <stdlib.h>
@@ -515,7 +515,6 @@ CdlFILE *CdSearchFile(CdlFILE *fp, const char *filename)
 
 
 	get_pathtable_entry(found_dir, &tbl_entry, NULL);
-
 	_CdReadIsoDirectory(tbl_entry.dirOffs);
 	get_filename(fp->name, filename);
 	

@@ -8,23 +8,12 @@
 #include "psbw/Texture.h"
 #include "psbw/settings.h"
 
+extern "C" {
+	#include "psbw/vsync.h"
+}
 // FIX: slower but fixes uploading textures whose size is not a multiple of 16 words
 #define DMA_MAX_CHUNK_SIZE 1
 #define CHAIN_BUFFER_SIZE 1024
-#define VSYNC_TIMEOUT	0x100000
-
-static volatile uint32_t _vblank_counter, _last_vblank;
-static volatile uint16_t _last_hblank;
-
-static void _default_vsync_halt(void) {
-	int counter = _vblank_counter;
-	for (int i = VSYNC_TIMEOUT; i; i--) {
-		if (counter != _vblank_counter)
-			return;
-	}
-}
-
-static void (*_vsync_halt_func)(void)   = &_default_vsync_halt;
 
 
 typedef struct {
@@ -37,36 +26,6 @@ DMAChain *chain;
 Scene* activeScene;
 void load_scene(Scene* scene) {
 	activeScene = scene;
-}
-
-int VSync(int mode) {
-	uint16_t delta = (TIMER_VALUE(1) - _last_hblank) & 0xffff;
-	if (mode == 1)
-		return delta;
-	if (mode < 0)
-		return _vblank_counter;
-
-	// Wait for the specified number of vertical blank events since the last
-	// call to VSync() to occur (if mode >= 2) or just for a single vertical
-	// blank (if mode = 0).
-	uint32_t target = mode ? (_last_vblank + mode) : (_vblank_counter + 1);
-
-	while (_vblank_counter < target) {
-		uint32_t status = GPU_GP1;
-		_vsync_halt_func();
-
-		// If interlaced mode is enabled, wait until the GPU starts displaying
-		// the next field.
-		if (status & (1 << 22)) {
-			while (!((GPU_GP1 ^ status) & (1 << 31)))
-				__asm__ volatile("");
-		}
-	}
-
-	_last_vblank = _vblank_counter;
-	_last_hblank = TIMER_VALUE(1);
-
-	return delta;
 }
 
 // Private util functions
@@ -260,7 +219,7 @@ void draw_update() {
 
 	*(chain->nextPacket) = gp0_endTag(0);
 	gpu_gp0_wait_ready();
-	gpu_wait_vsync();
+	//gpu_wait_vsync();
 	dma_send_linked_list(chain->data);
 }
 

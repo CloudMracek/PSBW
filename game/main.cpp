@@ -7,7 +7,10 @@
 #include <psbw/Texture.h>
 #include <psbw/Controller.h>
 #include <psbw/Sound.h>
+
+extern "C" {
 #include <psbw/filesystem.h>
+}
 
 #include <vendor/printf.h>
 
@@ -49,7 +52,7 @@ void game_setup() {
 
     psbw_load_scene(scene1);
 
-    CdSearchFile(&file, "\\SYSTEM.CNF");
+    //CdSearchFile(&file, "\\SYSTEM.CNF");
 
     sound_play_cdda(2, 1);
 }
