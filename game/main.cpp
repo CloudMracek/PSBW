@@ -10,11 +10,14 @@
 
 extern "C" {
 #include <psbw/filesystem.h>
+#include <stdint.h>
+#include "stdlib.h"
 }
 
 #include <vendor/printf.h>
 
 #include "game/game.h"
+
 
 Scene* scene1;
 GameObject* gameObject1;
@@ -54,6 +57,12 @@ void game_setup() {
 
     CdSearchFile(&file, "\\SYSTEM.CNF");
 
+    size_t len   = (file.size + 2047) & 0xfffff800;
+	void   *_ptr = malloc(len);
+
+    CdControl(CdlSetloc, &(file.pos), 0);
+	CdRead(len / 2048, (uint32_t*)_ptr, CdlModeSpeed);
+	if (CdReadSync(0, 0) < 0){}
     sound_play_cdda(2, 1);
 }
 

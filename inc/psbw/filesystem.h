@@ -2,21 +2,21 @@
 #include "psbw/cdrom.h"
 
 /// Structure of a double-endian unsigned short word
-typedef struct ISO_USHORT_PAIR
+typedef struct __attribute__((__packed__)) ISO_USHORT_PAIR
 {
 	unsigned short	lsb;	/// LSB format 16-bit word
 	unsigned short	msb;	/// MSB format 16-bit word
 } ISO_USHORT_PAIR;
 
 /// Structure of a double-endian unsigned int word
-typedef struct ISO_UINT_PAIR
+typedef struct __attribute__((__packed__)) ISO_UINT_PAIR
 {
 	unsigned int	lsb;		/// LSB format 32-bit word
 	unsigned int	msb;		/// MSB format 32-bit word
 } ISO_UINT_PAIR;
 
 /// ISO descriptor header structure
-typedef struct ISO_DESCRIPTOR_HEADER
+typedef struct __attribute__((__packed__)) ISO_DESCRIPTOR_HEADER
 {
 	unsigned char	type;		/// Volume descriptor type (1 is descriptor, 255 is descriptor terminator)
 	char			id[5];		/// Volume descriptor ID (always CD001)
@@ -24,7 +24,7 @@ typedef struct ISO_DESCRIPTOR_HEADER
 } ISO_DESCRIPTOR_HEADER;
 
 /// Structure of a date stamp for ISO_DIR_ENTRY structure
-typedef struct ISO_DATESTAMP
+typedef struct __attribute__((__packed__)) ISO_DATESTAMP
 {
 	unsigned char	year;		/// number of years since 1900
 	unsigned char	month;		/// month, where 1=January, 2=February, etc.
@@ -36,7 +36,7 @@ typedef struct ISO_DATESTAMP
 } ISO_DATESTAMP;
 
 /// Structure of an ISO path table entry (specifically for the cd::IsoReader class)
-typedef struct ISO_PATHTABLE_ENTRY
+typedef struct __attribute__((__packed__)) ISO_PATHTABLE_ENTRY
 {
 	unsigned char nameLength;	/// Name length (or 1 for the root directory)
 	unsigned char extLength;	/// Number of sectors in extended attribute record
@@ -45,7 +45,7 @@ typedef struct ISO_PATHTABLE_ENTRY
 								/// If nameLength is odd numbered, a padding byte will be present after the identifier text.
 } ISO_PATHTABLE_ENTRY;
 
-typedef struct ISO_DIR_ENTRY
+typedef struct __attribute__((__packed__)) ISO_DIR_ENTRY
 {
 	unsigned char entryLength;			// Directory entry length (variable, use for parsing through entries)
 	unsigned char extLength;			// Extended entry data length (always 0)
@@ -59,7 +59,7 @@ typedef struct ISO_DIR_ENTRY
 	unsigned char identifierLen;		// Identifier (file/directory name) length in bytes
 } ISO_DIR_ENTRY;
 
-typedef struct ISO_ROOTDIR_HEADER
+typedef struct __attribute__((__packed__)) ISO_ROOTDIR_HEADER
 {
 	unsigned char entryLength;			// Always 34 bytes
 	unsigned char extLength;			// Always 0
@@ -75,7 +75,7 @@ typedef struct ISO_ROOTDIR_HEADER
 } ISO_ROOTDIR_HEADER;
 
 // ISO descriptor structure
-typedef struct ISO_DESCRIPTOR
+typedef struct __attribute__((__packed__)) ISO_DESCRIPTOR
 {
 
 	// ISO descriptor header
