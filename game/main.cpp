@@ -7,6 +7,7 @@
 #include <psbw/Texture.h>
 #include <psbw/Controller.h>
 #include <psbw/Sound.h>
+#include "psbw/fudgebundle.h"
 
 extern "C" {
 #include <psbw/filesystem.h>
@@ -15,6 +16,7 @@ extern "C" {
 }
 
 #include <vendor/printf.h>
+#include <stdio.h>
 
 #include "game/game.h"
 
@@ -25,6 +27,8 @@ Sprite* sprite1;
 Texture* texture1;
 Controller* controller1;
 Sound* sound1;
+
+FDG_HASH_ENTRY* entry;
 
 CdlFILE file;
 
@@ -43,19 +47,12 @@ void game_setup() {
     controller1 = new Controller(CONTROLLER_PORT_1);
     sound1 = new Sound(soundData);
 
-    psbw_upload_texture(texture1, textureData, SCREEN_WIDTH * 2, 0, 64, 64);
-
-    sprite1->Width = texture1->width;
-    sprite1->Height = texture1->height;
-
-    sprite1->tex = texture1;
-
-    gameObject1->components[0] = sprite1;
-    scene1->objects[0] = gameObject1;
 
     psbw_load_scene(scene1);
 
-    CdSearchFile(&file, "\\SYSTEM.CNF");
+    CdSearchFile(&file, "\\BUNDLE.FDG");
+
+    psbw_upload_texture(texture1, textureData, SCREEN_WIDTH * 2, 0, 64, 64);
 
     size_t len   = (file.size + 2047) & 0xfffff800;
 	void   *_ptr = malloc(len);
@@ -63,7 +60,18 @@ void game_setup() {
     CdControl(CdlSetloc, &(file.pos), 0);
 	CdRead(len / 2048, (uint32_t*)_ptr, CdlModeSpeed);
 	if (CdReadSync(0, 0) < 0){}
-    sound_play_cdda(2, 1);
+
+    Fudgebundle *fdg = new Fudgebundle((uint8_t*)_ptr);
+    texture1 = fdg->fudgebundle_get_texture(fdg_hash("sprite_cat1"));
+    
+    sprite1->tex = texture1;
+    sprite1->Width = texture1->width;
+    sprite1->Height = texture1->height;
+
+    gameObject1->components[0] = sprite1;
+    scene1->objects[0] = gameObject1;
+
+    sound_play_cdda(2,1);
 }
 
 void game_loop() {

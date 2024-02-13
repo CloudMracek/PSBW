@@ -73,7 +73,7 @@ uint32_t *dma_get_chain_pointer(int numCommands) {
 	return dma_allocate_packet(chain, numCommands);
 }
 
-static void vram_send_data(const void *data, int x, int y, int width, int height) {
+void vram_send_data(const void *data, int x, int y, int width, int height) {
 	waitForDMATransfer(DMA_GPU, 100000);
 
 	// Calculate how many 32-bit words will be sent from the width and height of

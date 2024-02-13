@@ -14,7 +14,7 @@
 		<directory_tree>
 			<file name="SYSTEM.CNF"		type="data" source="${PROJECT_BINARY_DIR}/system.cnf" />
 			<file name="${GAME_NAME}.EXE"	type="data" source="${GAME_NAME}.psexe" />
-
+			<file name="BUNDLE.FDG" type="data" source="${PROJECT_SOURCE_DIR}/assets/bundle.fdg"/>
 			<dummy sectors="1024"/>
 		</directory_tree>
 	</track>

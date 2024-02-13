@@ -12,6 +12,8 @@ void draw_update();
 
 uint32_t *dma_get_chain_pointer(int numCommands);
 
+void vram_send_data(const void *data, int x, int y, int width, int height);
+
 void tex_upload(
 	Texture *info, const void *data, int x, int y, int width, int height
 );
