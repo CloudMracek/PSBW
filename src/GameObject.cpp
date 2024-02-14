@@ -6,18 +6,20 @@ GameObject::GameObject(int x, int y, int z) {
     GameObject::position.x = x;
     GameObject::position.y = y;
     GameObject::position.z = z;
+    _linked_list.component = nullptr;
 }
 
 void GameObject::addComponent(Component *component) {
-    if(_linked_list == nullptr) {
+    if(_linked_list.component == nullptr) {
         COMPONENT_ENTRY *entry = (COMPONENT_ENTRY*) malloc(sizeof(COMPONENT_ENTRY));
         entry->component = component;
         entry->next = nullptr;
-        _linked_list = entry;
+        _linked_list = *entry;
+        free(entry);
         return;
     }
 
-    COMPONENT_ENTRY *entry = _linked_list;
+    COMPONENT_ENTRY *entry = &_linked_list;
 
     while(entry->next != nullptr) {
         entry = entry->next;
@@ -33,7 +35,7 @@ void GameObject::addComponent(Component *component) {
 
 void GameObject::execute() {
    
-   COMPONENT_ENTRY *entry = _linked_list;
+   COMPONENT_ENTRY *entry = &_linked_list;
     while(entry != nullptr) {
         entry->component->execute(this);
         entry = entry->next;

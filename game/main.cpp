@@ -57,7 +57,6 @@ void game_setup() {
     sprite2 = new Sprite(SPRITE_TYPE_TEXTURED);
 
     controller1 = new Controller(CONTROLLER_PORT_1);
-    sound1 = new Sound(soundData);
 
 
     psbw_load_scene(scene1);
@@ -76,7 +75,8 @@ void game_setup() {
     Fudgebundle *fdg = new Fudgebundle((uint8_t*)_ptr);
     texture1 = fdg->fudgebundle_get_texture(fdg_hash("sprite_cat3"));
     texture2 = fdg->fudgebundle_get_texture(fdg_hash("sprite_cat7"));
-    
+    sound1 = fdg->fudgebundle_get_sound(fdg_hash("meow"));
+    //sound1 = new Sound(soundData);
     font = fdg->fudgebundle_get_texture(fdg_hash("font"));
 
     setFont(font);
@@ -107,12 +107,12 @@ void game_loop() {
     // Bounce off the walls
     if (gameObject1->position.x <= 0 || gameObject1->position.x + sprite1->Width >= SCREEN_WIDTH) {
         SPEED_X = -SPEED_X;
-        //sound1->play();
+        sound1->play();
     }
 
     if (gameObject1->position.y <= 0 || gameObject1->position.y + sprite1->Height >= SCREEN_HEIGHT) {
         SPEED_Y = -SPEED_Y;
-        //sound1->play();
+        sound1->play();
     }
 
 }

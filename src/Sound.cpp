@@ -172,6 +172,11 @@ Sound::Sound(const void *data)
 	spu_upload_sample(data);
 }
 
+
+Sound::Sound()
+{
+}
+
 void spu_upload(const void* data, size_t size) {
 	spu_dma_transfer(0x1000, data, size, true);
 }
@@ -211,8 +216,8 @@ void Sound::play()
 	// 1.0 = 44100 Hz) and the address in 8-byte units; psxspu.h provides the
 	// getSPUSampleRate() and getSPUAddr() macros to convert values to these
 	// units.
-	SPU_CH_FREQ(ch) = getSPUSampleRate(sampleRate);
-	SPU_CH_ADDR(ch) = getSPUAddr(soundAddr);
+	SPU_CH_FREQ(ch) = sampleRate;
+	SPU_CH_ADDR(ch) = (soundAddr)+0x0200;
 
 	// Set the channel's volume and ADSR parameters (0x80ff and 0x1fee are
 	// dummy values that disable the ADSR envelope entirely).

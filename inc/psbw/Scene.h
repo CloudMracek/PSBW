@@ -15,7 +15,8 @@ typedef struct GAMEOBJECT_ENTRY {
 class Scene {
     public:
         char* name;
+        Scene();
         void addGameObject(GameObject *object);
-        GAMEOBJECT_ENTRY* _linked_list;
+        GAMEOBJECT_ENTRY _linked_list;
 
 };

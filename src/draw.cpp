@@ -210,7 +210,7 @@ void draw_update() {
 	ptr[1] = gp0_xy(frameX, frameY);
     ptr[2] = gp0_xy(SCREEN_WIDTH, SCREEN_HEIGHT);
 
-	GAMEOBJECT_ENTRY *entry = activeScene->_linked_list;
+	GAMEOBJECT_ENTRY *entry = &activeScene->_linked_list;
 	while(entry != nullptr) {
 		entry->object->execute();
 		entry = entry->next;
@@ -222,6 +222,7 @@ void draw_update() {
 	gpu_gp0_wait_ready();
 	VSync(0);
 	dma_send_linked_list(chain->data);
+	waitForDMATransfer(DMA_GPU, 100000);
 }
 
 

@@ -85,7 +85,7 @@ int Fudgebundle::_fudgebundle_load(uint8_t* data) {
     }
 
     // Upload SPU samples
-    spu_upload(data, _fdg_index->spuLength);
+    spu_upload(data+_fdg_index->indexLength+_fdg_index->vramLength, _fdg_index->spuLength);
     return 0;
 }
 
@@ -180,7 +180,13 @@ Texture *Fudgebundle::fudgebundle_get_texture(uint32_t hash) {
 
     return tex;
 }
-
+FDG_SOUND_DESCRIPTOR *soundDesc;
+FDG_HASH_ENTRY *entry2;
 Sound *Fudgebundle::fudgebundle_get_sound(uint32_t hash) {
-    FDG_HASH_ENTRY *entry = _fudgebundle_get_entry(hash);
+    entry2 = _fudgebundle_get_entry(hash);
+    soundDesc = (FDG_SOUND_DESCRIPTOR*) (_ram_data+entry2->offset);
+    Sound* snd = new Sound();
+    snd->soundAddr = soundDesc->leftOffset;
+    snd->sampleRate = soundDesc->sampleRate;
+    return snd;
 }

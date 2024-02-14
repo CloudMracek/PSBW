@@ -24,5 +24,5 @@ public:
     void execute();
     void addComponent(Component* component);
 private:
-    COMPONENT_ENTRY* _linked_list;
+    COMPONENT_ENTRY _linked_list;
 };

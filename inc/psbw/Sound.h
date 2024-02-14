@@ -27,6 +27,7 @@ class Sound {
          * \brief Uploads specified VAG data into SPU RAM. VAGi not supported.
         */
         Sound(const void *data);
+        Sound();
 
         /**
          * \brief Play's the selected file. Loops if Loop flag is set in VAG file
