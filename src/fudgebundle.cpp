@@ -28,6 +28,11 @@ typedef struct [[gnu::packed]] FDG_FRAME_DESCRIPTOR
     uint32_t frameFlags;
 } FDG_FRAME_DESCRIPTOR;
 
+typedef struct [[gnu::packed]] FDG_SOUND_DESCRIPTOR
+{
+    uint16_t leftOffset, rightOffset, length, sampleRate;
+} FDG_SOUND_DESCRIPTOR;
+
 uint32_t fdg_hash(const char *str) {
     uint32_t value = 0;
 
