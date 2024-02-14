@@ -2,6 +2,7 @@
 #include <stdint.h>
 
 #include "psbw/Texture.h"
+#include "psbw/Sound.h"
 
 typedef struct [[gnu::packed]] FDG_INDEX
 {
@@ -38,6 +39,7 @@ class Fudgebundle {
     public:
         Fudgebundle(uint8_t* data);
         Texture *fudgebundle_get_texture(uint32_t hash);
+        Sound *fudgebundle_get_sound(uint32_t hash);
     private:
         FDG_INDEX* _fdg_index;
         FDG_HASH_ENTRY* _hash_table;

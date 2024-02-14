@@ -171,6 +171,11 @@ Sound::Sound(const void *data)
 {
 	spu_upload_sample(data);
 }
+
+void spu_upload(const void* data, size_t size) {
+	spu_dma_transfer(0x1000, data, size, true);
+}
+
 void Sound::spu_upload_sample(const void *data)
 {
 	// Round the size up to the nearest multiple of 64, as SPU DMA transfers

@@ -1,7 +1,10 @@
 #pragma once
 
+#include <stddef.h>
+
 void spu_init();
 
+void spu_upload(const void *data, size_t size);
 
 /// @brief Plays an audio track from the CDROM
 void sound_play_cdda(int track, int loop);
@@ -30,10 +33,9 @@ class Sound {
         */
         void play();
 
-        
-    private:
         int soundAddr;
         int sampleRate;
+    private:
         void spu_upload_sample(const void *data);
         
 };

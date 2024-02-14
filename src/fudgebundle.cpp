@@ -7,6 +7,7 @@
 #include <ps1/gpucmd.h>
 
 #include "psbw/draw.h"
+#include "psbw/Sound.h"
 
 #define PAGE_WIDTH 64
 #define PAGE_HEIGHT 256
@@ -55,13 +56,18 @@ int Fudgebundle::_fudgebundle_load(uint8_t* data) {
         return NULL;
     }
 
+
+    // Calculate pointer to VRAM data in RAM and the number of pages;
     uint8_t* vram_data = data+_fdg_index->indexLength;
     int pageCount = (_fdg_index->numAtlases256 * 4) + (_fdg_index->numAtlases192 * 3) +
     + (_fdg_index->numAtlases128 * 2) + _fdg_index->numAtlases64;
 
+
+    // This is for fudgebundle stacking which is sadly broken now
     _entry_texpage = _current_texpage;
     _current_texpage = _current_texpage + pageCount;
 
+    // Upload data to VRAM
     for(int i = 0; i < pageCount; i++) {
         uint8_t* currentPage = vram_data+(i*(64*256*sizeof(short)));
         if(_entry_texpage+i > 15) {
@@ -72,6 +78,9 @@ int Fudgebundle::_fudgebundle_load(uint8_t* data) {
         }
         waitForDMATransfer(DMA_GPU, 100000);
     }
+
+    // Upload SPU samples
+    spu_upload(data, _fdg_index->spuLength);
     return 0;
 }
 
@@ -165,4 +174,8 @@ Texture *Fudgebundle::fudgebundle_get_texture(uint32_t hash) {
     tex->type = frameDesc->frameFlags & 0x3;
 
     return tex;
+}
+
+Sound *Fudgebundle::fudgebundle_get_sound(uint32_t hash) {
+    FDG_HASH_ENTRY *entry = _fudgebundle_get_entry(hash);
 }

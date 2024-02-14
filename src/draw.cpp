@@ -208,13 +208,10 @@ void draw_update() {
 	ptr[1] = gp0_xy(frameX, frameY);
     ptr[2] = gp0_xy(SCREEN_WIDTH, SCREEN_HEIGHT);
 
-	for(int i = 0; i < 100; i++) {
-		if(activeScene->objects[i] != nullptr) {
-			activeScene->objects[i]->execute();
-		}
-		else {
-			break;
-		}
+	GAMEOBJECT_ENTRY *entry = activeScene->_linked_list;
+	while(entry != nullptr) {
+		entry->object->execute();
+		entry = entry->next;
 	}
 
 	*(chain->nextPacket) = gp0_endTag(0);

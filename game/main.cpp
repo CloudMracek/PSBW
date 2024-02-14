@@ -22,9 +22,16 @@ extern "C" {
 
 
 Scene* scene1;
+
 GameObject* gameObject1;
+GameObject* gameObject2;
+
 Sprite* sprite1;
+Sprite* sprite2;
+
 Texture* texture1;
+Texture* texture2;
+
 Controller* controller1;
 Sound* sound1;
 
@@ -42,8 +49,11 @@ int SPEED_Y = 1;
 void game_setup() {
     scene1 = new Scene();
     gameObject1 = new GameObject(0, 0, 0);
+    gameObject2 = new GameObject(0, 0, 0);
+
     sprite1 = new Sprite(SPRITE_TYPE_TEXTURED);
-    texture1 = new Texture();
+    sprite2 = new Sprite(SPRITE_TYPE_TEXTURED);
+
     controller1 = new Controller(CONTROLLER_PORT_1);
     sound1 = new Sound(soundData);
 
@@ -62,14 +72,22 @@ void game_setup() {
 	if (CdReadSync(0, 0) < 0){}
 
     Fudgebundle *fdg = new Fudgebundle((uint8_t*)_ptr);
-    texture1 = fdg->fudgebundle_get_texture(fdg_hash("sprite_cat8"));
+    texture1 = fdg->fudgebundle_get_texture(fdg_hash("sprite_cat3"));
+    texture2 = fdg->fudgebundle_get_texture(fdg_hash("sprite_cat7"));
     
     sprite1->tex = texture1;
     sprite1->Width = texture1->width;
     sprite1->Height = texture1->height;
 
-    gameObject1->components[0] = sprite1;
-    scene1->objects[0] = gameObject1;
+    sprite2->tex = texture2;
+    sprite2->Width = texture2->width;
+    sprite2->Height = texture2->height;
+
+    gameObject1->addComponent(sprite1);
+    scene1->addGameObject(gameObject1);
+
+    gameObject2->addComponent(sprite2);
+    scene1->addGameObject(gameObject2);
 
     sound_play_cdda(2,1);
 }
