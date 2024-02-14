@@ -221,6 +221,8 @@ int CdMix(const CdlATV *vol) {
 
 void CdPlayCdda(int track, int loop)
 {
+	uint8_t _mode = CdlModeDA;
+	CdCommand(CdlSetmode, &_mode, 1, 0);
 	cdda_loop = loop;
 	int param = track;
 	uint8_t result[16];

@@ -42,6 +42,9 @@ class Fudgebundle {
         FDG_INDEX* _fdg_index;
         FDG_HASH_ENTRY* _hash_table;
         uint8_t* _ram_data;
+
+        uint8_t _entry_texpage;
+
         int _fudgebundle_load(uint8_t* data);
         FDG_HASH_ENTRY *_fudgebundle_get_entry(uint32_t hash);
 };

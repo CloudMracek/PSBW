@@ -19,7 +19,12 @@ void Sprite::execute(GameObject* parent) {
         ptr[0] = gp0_texpage(tex->page, false, false);
 		ptr[1] = gp0_rectangle(true, true, false);
 		ptr[2] = gp0_xy(parent->position.x, parent->position.y);
-		ptr[3] = gp0_uv(tex->u, tex->v, 0);
+        if(tex->type == 0 || tex->type == 1) {
+ 		    ptr[3] = gp0_uv(tex->u, tex->v, tex->clut);
+        }
+        else {
+            ptr[3] = gp0_uv(tex->u, tex->v, 0);
+        }
 		ptr[4] = gp0_xy(tex->width, tex->height);
     }
 }

@@ -52,7 +52,7 @@ void game_setup() {
 
     CdSearchFile(&file, "\\BUNDLE.FDG");
 
-    psbw_upload_texture(texture1, textureData, SCREEN_WIDTH * 2, 0, 64, 64);
+    //psbw_upload_texture(texture1, textureData, SCREEN_WIDTH * 2, 0, 64, 64);
 
     size_t len   = (file.size + 2047) & 0xfffff800;
 	void   *_ptr = malloc(len);
@@ -75,13 +75,6 @@ void game_setup() {
 }
 
 void game_loop() {
-
-    if(controller1->GetButton(X)) {
-        sprite1->Type = SPRITE_TYPE_FLAT_COLOR;
-    }
-    else {
-        sprite1->Type = SPRITE_TYPE_TEXTURED;
-    }
 
     // Move the game object
     gameObject1->position.x += SPEED_X;

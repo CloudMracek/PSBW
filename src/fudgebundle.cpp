@@ -11,6 +11,8 @@
 #define PAGE_WIDTH 64
 #define PAGE_HEIGHT 256
 
+uint8_t _current_texpage = 10;
+
 typedef struct [[gnu::packed]] FDG_TEXTURE_DESCRIPTOR
 {
 	uint16_t width, height, frames, mipmaps;
@@ -57,13 +59,16 @@ int Fudgebundle::_fudgebundle_load(uint8_t* data) {
     int pageCount = (_fdg_index->numAtlases256 * 4) + (_fdg_index->numAtlases192 * 3) +
     + (_fdg_index->numAtlases128 * 2) + _fdg_index->numAtlases64;
 
+    _entry_texpage = _current_texpage;
+    _current_texpage = _current_texpage + pageCount;
+
     for(int i = 0; i < pageCount; i++) {
         uint8_t* currentPage = vram_data+(i*(64*256*sizeof(short)));
-        if(i > 6) {
-            vram_send_data(currentPage, (i*64), 256, PAGE_WIDTH, PAGE_HEIGHT);
+        if(_entry_texpage+i > 15) {
+            vram_send_data(currentPage, ((_entry_texpage+i) % 16)*64, 256, PAGE_WIDTH, PAGE_HEIGHT);
         }
         else {
-            vram_send_data(currentPage, (640+i*64), 0, PAGE_WIDTH, PAGE_HEIGHT);
+            vram_send_data(currentPage, ((_entry_texpage+i)*64), 0, PAGE_WIDTH, PAGE_HEIGHT);
         }
         waitForDMATransfer(DMA_GPU, 100000);
     }
@@ -97,16 +102,20 @@ Texture *Fudgebundle::fudgebundle_get_texture(uint32_t hash) {
 
     FDG_TEXTURE_DESCRIPTOR *texDesc = (FDG_TEXTURE_DESCRIPTOR*) (_ram_data+entry->offset);
     FDG_FRAME_DESCRIPTOR *frameDesc = (FDG_FRAME_DESCRIPTOR*) (_ram_data+entry->offset+sizeof(FDG_TEXTURE_DESCRIPTOR));
-    
-    if(frameDesc->frameFlags & 0x3 != 2) {
-        return NULL;
-    }
 
     Texture *tex = new Texture();
 
+    int widthDivider;
+    if((frameDesc->frameFlags & 0x3) != 2) {
+       widthDivider = ((frameDesc->frameFlags & 0x3) == GP0_COLOR_8BPP) ? 2 : 4;
+    }
+    else {
+        widthDivider = 1;
+    }
+
     tex->width = frameDesc->width;
     tex->height = frameDesc->height;
-    tex->u = frameDesc->xOffset;
+    tex->u = frameDesc->xOffset*widthDivider;
     tex->v = frameDesc->yOffset;
 
     int globalX, globalY;
@@ -121,8 +130,18 @@ Texture *Fudgebundle::fudgebundle_get_texture(uint32_t hash) {
     }
 
     tex->page = gp0_page(
-		globalX / 64, globalY / 256, GP0_BLEND_SEMITRANS, GP0_COLOR_16BPP
+		globalX / 64, globalY / 256, GP0_BLEND_SEMITRANS, (GP0ColorDepth) (frameDesc->frameFlags & 0x3) 
 	);
+
+    if(frameDesc->frameFlags & 0x3 == 2) {
+        tex->clut = 0;
+    }
+    else if((frameDesc->frameFlags & 0x3) == 0 || (frameDesc->frameFlags & 0x3) == 1) {
+        uint16_t pageOffset = ((((_entry_texpage + frameDesc->palletePageIndex)%16)*64) / 16) | ((((_entry_texpage + frameDesc->palletePageIndex) < 16) ? 0 : 64) << 6);
+        tex->clut = frameDesc->packedPalleteOffset+pageOffset;
+        for(int j = 1; j < 10000; j++);
+    }
+    tex->type = frameDesc->frameFlags & 0x3;
 
     return tex;
 }
