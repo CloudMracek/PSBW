@@ -84,6 +84,7 @@ add_executable(${PROJECT_NAME}
 	src/vsync.c 
 	src/interrupts.c
 	src/fudgebundle.cpp
+	src/font.cpp
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE ${GAME_NAME} common)
 target_include_directories(${PROJECT_NAME} PUBLIC inc)

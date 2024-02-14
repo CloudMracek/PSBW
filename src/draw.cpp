@@ -7,6 +7,8 @@
 #include "psbw/GameObject.h"
 #include "psbw/Texture.h"
 #include "psbw/settings.h"
+#include "psbw/font.h"
+
 
 extern "C" {
 	#include "psbw/vsync.h"
@@ -213,6 +215,8 @@ void draw_update() {
 		entry->object->execute();
 		entry = entry->next;
 	}
+
+	printString(140,110,"AHOOOOOJ");
 
 	*(chain->nextPacket) = gp0_endTag(0);
 	gpu_gp0_wait_ready();

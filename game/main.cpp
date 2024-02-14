@@ -8,6 +8,7 @@
 #include <psbw/Controller.h>
 #include <psbw/Sound.h>
 #include "psbw/fudgebundle.h"
+#include "psbw/font.h"
 
 extern "C" {
 #include <psbw/filesystem.h>
@@ -31,6 +32,7 @@ Sprite* sprite2;
 
 Texture* texture1;
 Texture* texture2;
+Texture* font;
 
 Controller* controller1;
 Sound* sound1;
@@ -75,6 +77,10 @@ void game_setup() {
     texture1 = fdg->fudgebundle_get_texture(fdg_hash("sprite_cat3"));
     texture2 = fdg->fudgebundle_get_texture(fdg_hash("sprite_cat7"));
     
+    font = fdg->fudgebundle_get_texture(fdg_hash("font"));
+
+    setFont(font);
+
     sprite1->tex = texture1;
     sprite1->Width = texture1->width;
     sprite1->Height = texture1->height;

@@ -3,7 +3,6 @@
 #include <ps1/gpucmd.h>
 
 #include "psbw/draw.h"
-#include "psbw/Texture.h"
 
 typedef struct {
 	uint8_t x, y, width, height;
@@ -14,7 +13,7 @@ typedef struct {
 	const char *str;
 } PrintCommand;
 
-Texture *font;
+Texture *_font;
 
 static const SpriteInfo fontSprites[] = {
 	{ .x =  6, .y =  0, .width = 2, .height = 9 }, // !
@@ -120,7 +119,7 @@ static const SpriteInfo fontSprites[] = {
 #define FONT_LINE_HEIGHT      10
 
 void setFont(Texture* texture) {
-	font = texture;
+	_font = texture;
 }
 
 void printString(int x, int y, const char *str) {
@@ -133,7 +132,7 @@ void printString(int x, int y, const char *str) {
 	// be omitted when reusing the same texture, so sending it here just once is
 	// enough.
 	ptr    = dma_get_chain_pointer(1);
-	ptr[0] = gp0_texpage(font->page, false, false);
+	ptr[0] = gp0_texpage(_font->page, false, false);
 
 	// Iterate over every character in the string.
 	for (; *str; str++) {
@@ -173,7 +172,7 @@ void printString(int x, int y, const char *str) {
 		ptr    = dma_get_chain_pointer(4);
 		ptr[0] = gp0_rectangle(true, true, true);
 		ptr[1] = gp0_xy(currentX, currentY);
-		ptr[2] = gp0_uv(font->u + sprite->x, font->v + sprite->y, font->clut);
+		ptr[2] = gp0_uv(_font->u + sprite->x, _font->v + sprite->y, _font->clut);
 		ptr[3] = gp0_xy(sprite->width, sprite->height);
 
 		// Move onto the next character.
