@@ -113,25 +113,46 @@ Texture *Fudgebundle::fudgebundle_get_texture(uint32_t hash) {
         widthDivider = 1;
     }
 
+
     tex->width = frameDesc->width;
     tex->height = frameDesc->height;
-    tex->u = frameDesc->xOffset*widthDivider;
-    tex->v = frameDesc->yOffset;
 
     int globalX, globalY;
 
     if(frameDesc->imagePageIndex <= 6) {
         globalX = (frameDesc->imagePageIndex+10)*64 + tex->u;
-        globalY = tex->v;
+        globalY = tex->v;    widthDivider = 4;
     }
     else {
         globalX = (frameDesc->imagePageIndex-7)*64;
         globalY = tex->v+256;
     }
 
-    tex->page = gp0_page(
-		globalX / 64, globalY / 256, GP0_BLEND_SEMITRANS, (GP0ColorDepth) (frameDesc->frameFlags & 0x3) 
-	);
+    uint8_t mode = (frameDesc->frameFlags & 0x3);
+
+    switch(mode) {
+        case 0:
+            widthDivider = 4;
+            tex->page = gp0_page(
+		        globalX / 64, globalY / 256, GP0_BLEND_SEMITRANS, GP0_COLOR_4BPP
+	        );
+            break;
+        case 1:
+            widthDivider = 2;
+            tex->page = gp0_page(
+		        globalX / 64, globalY / 256, GP0_BLEND_SEMITRANS, GP0_COLOR_8BPP
+	        );
+            break;
+        case 2:
+            widthDivider = 1;
+            tex->page = gp0_page(
+		        globalX / 64, globalY / 256, GP0_BLEND_SEMITRANS, GP0_COLOR_16BPP
+	        );
+            break;
+    }
+    
+    tex->u = frameDesc->xOffset*widthDivider;
+    tex->v = frameDesc->yOffset;
 
     if(frameDesc->frameFlags & 0x3 == 2) {
         tex->clut = 0;

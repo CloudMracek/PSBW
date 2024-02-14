@@ -62,7 +62,7 @@ void game_setup() {
 	if (CdReadSync(0, 0) < 0){}
 
     Fudgebundle *fdg = new Fudgebundle((uint8_t*)_ptr);
-    texture1 = fdg->fudgebundle_get_texture(fdg_hash("sprite_cat1"));
+    texture1 = fdg->fudgebundle_get_texture(fdg_hash("sprite_cat8"));
     
     sprite1->tex = texture1;
     sprite1->Width = texture1->width;
