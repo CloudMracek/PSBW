@@ -219,10 +219,17 @@ int CdMix(const CdlATV *vol) {
 	return 1;
 }
 
+void _cdda_end_callback() {
+	if(cdda_loop) {
+		CdPlayCdda(cdda_current_track, 1);
+	}
+}
+
 void CdPlayCdda(int track, int loop)
 {
-	uint8_t _mode = CdlModeDA;
+	uint8_t _mode = CdlModeAP | CdlModeDA;
 	CdCommand(CdlSetmode, &_mode, 1, 0);
+	CdAutoPauseCallback(_cdda_end_callback);
 	cdda_loop = loop;
 	int param = track;
 	uint8_t result[16];

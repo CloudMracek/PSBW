@@ -227,6 +227,9 @@ static inline void switchThreadImmediate(Thread *thread) {
 	__asm__ volatile("syscall 0\n" ::: "memory");
 }
 
+uint32_t rand();
+int randint(int min, int max);
+
 #ifdef __cplusplus
 }
 #endif

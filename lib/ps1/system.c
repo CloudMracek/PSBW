@@ -21,29 +21,30 @@
 #include "ps1/registers.h"
 #include "ps1/system.h"
 
-#define BIOS_ENTRY_POINT ((VoidFunction)   0xbfc00000)
-#define BIOS_API_TABLE   ((VoidFunction *) 0x80000200)
-#define BIOS_BP_VECTOR   ((uint32_t *)     0x80000040)
-#define BIOS_EXC_VECTOR  ((uint32_t *)     0x80000080)
+#define BIOS_ENTRY_POINT ((VoidFunction)0xbfc00000)
+#define BIOS_API_TABLE ((VoidFunction *)0x80000200)
+#define BIOS_BP_VECTOR ((uint32_t *)0x80000040)
+#define BIOS_EXC_VECTOR ((uint32_t *)0x80000080)
 
 /* Internal state */
 
-static uint32_t     _savedBreakpointVector[4];
-static uint32_t     _savedExceptionVector[4];
+static uint32_t _savedBreakpointVector[4];
+static uint32_t _savedExceptionVector[4];
 static VoidFunction _flushCache = 0;
-static Thread       _mainThread;
+static Thread _mainThread;
 
-ArgFunction interruptHandler     = 0;
-void        *interruptHandlerArg = 0;
+ArgFunction interruptHandler = 0;
+void *interruptHandlerArg = 0;
 
 Thread *currentThread = &_mainThread;
-Thread *nextThread    = &_mainThread;
+Thread *nextThread = &_mainThread;
 
 /* Exception handler setup */
 
 void _exceptionVector(void);
 
-void installExceptionHandler(void) {
+void installExceptionHandler(void)
+{
 	// Clear all pending IRQ flags and prevent the interrupt controller from
 	// generating further IRQs.
 	IRQ_MASK = 0;
@@ -61,9 +62,9 @@ void installExceptionHandler(void) {
 
 	// Overwrite the default breakpoint and exception handlers placed into RAM
 	// by the BIOS with a function that will jump to our custom handler.
-	__builtin_memcpy(_savedBreakpointVector, BIOS_BP_VECTOR,  16);
-	__builtin_memcpy(_savedExceptionVector,  BIOS_EXC_VECTOR, 16);
-	__builtin_memcpy(BIOS_BP_VECTOR,  &_exceptionVector, 16);
+	__builtin_memcpy(_savedBreakpointVector, BIOS_BP_VECTOR, 16);
+	__builtin_memcpy(_savedExceptionVector, BIOS_EXC_VECTOR, 16);
+	__builtin_memcpy(BIOS_BP_VECTOR, &_exceptionVector, 16);
 	__builtin_memcpy(BIOS_EXC_VECTOR, &_exceptionVector, 16);
 	_flushCache();
 
@@ -74,7 +75,8 @@ void installExceptionHandler(void) {
 	cop0_setSR(COP0_SR_IEc | COP0_SR_Im2 | COP0_SR_CU0 | COP0_SR_CU2);
 }
 
-void uninstallExceptionHandler(void) {
+void uninstallExceptionHandler(void)
+{
 	// Clear all pending IRQ flags and prevent the interrupt controller from
 	// generating further IRQs.
 	IRQ_MASK = 0;
@@ -86,22 +88,24 @@ void uninstallExceptionHandler(void) {
 	cop0_setSR(COP0_SR_CU0);
 
 	// Restore the original BIOS breakpoint and exception handlers.
-	__builtin_memcpy(BIOS_BP_VECTOR,  _savedBreakpointVector, 16);
-	__builtin_memcpy(BIOS_EXC_VECTOR, _savedExceptionVector,  16);
+	__builtin_memcpy(BIOS_BP_VECTOR, _savedBreakpointVector, 16);
+	__builtin_memcpy(BIOS_EXC_VECTOR, _savedExceptionVector, 16);
 	_flushCache();
 }
 
-void setInterruptHandler(ArgFunction func, void *arg) {
+void setInterruptHandler(ArgFunction func, void *arg)
+{
 	disableInterrupts();
 
-	interruptHandler    = func;
+	interruptHandler = func;
 	interruptHandlerArg = arg;
 	atomic_signal_fence(memory_order_release);
 }
 
-void flushCache(void) {
-	//if (!_flushCache)
-		//_flushCache = BIOS_API_TABLE[0x44];
+void flushCache(void)
+{
+	// if (!_flushCache)
+	//_flushCache = BIOS_API_TABLE[0x44];
 
 	bool enable = disableInterrupts();
 
@@ -110,7 +114,8 @@ void flushCache(void) {
 		enableInterrupts();
 }
 
-void softReset(void) {
+void softReset(void)
+{
 	disableInterrupts();
 	BIOS_ENTRY_POINT();
 	__builtin_unreachable();
@@ -118,8 +123,10 @@ void softReset(void) {
 
 /* IRQ acknowledgement */
 
-bool acknowledgeInterrupt(IRQChannel irq) {
-	if (IRQ_STAT & (1 << irq)) {
+bool acknowledgeInterrupt(IRQChannel irq)
+{
+	if (IRQ_STAT & (1 << irq))
+	{
 		IRQ_STAT = ~(1 << irq);
 		return true;
 	}
@@ -127,8 +134,10 @@ bool acknowledgeInterrupt(IRQChannel irq) {
 	return false;
 }
 
-bool waitForInterrupt(IRQChannel irq, int timeout) {
-	for (; timeout > 0; timeout -= 10) {
+bool waitForInterrupt(IRQChannel irq, int timeout)
+{
+	for (; timeout > 0; timeout -= 10)
+	{
 		if (acknowledgeInterrupt(irq))
 			return true;
 
@@ -138,8 +147,10 @@ bool waitForInterrupt(IRQChannel irq, int timeout) {
 	return false;
 }
 
-bool waitForDMATransfer(DMAChannel dma, int timeout) {
-	for (; timeout > 0; timeout -= 10) {
+bool waitForDMATransfer(DMAChannel dma, int timeout)
+{
+	for (; timeout > 0; timeout -= 10)
+	{
 		if (!(DMA_CHCR(dma) & DMA_CHCR_ENABLE))
 			return true;
 
@@ -151,7 +162,8 @@ bool waitForDMATransfer(DMAChannel dma, int timeout) {
 
 /* Thread switching */
 
-void switchThread(Thread *thread) {
+void switchThread(Thread *thread)
+{
 	if (!thread)
 		thread = &_mainThread;
 
@@ -159,3 +171,19 @@ void switchThread(Thread *thread) {
 	atomic_signal_fence(memory_order_release);
 }
 
+uint32_t m_seed = 2891583007UL;
+
+uint32_t rand()
+{
+	unsigned int a = m_seed;
+	a *= 3148259783UL;
+	m_seed = a;
+	return a;
+}
+
+int randint(int min, int max) {
+    uint32_t random = rand();
+    uint32_t range = (uint32_t)(max - min) + 1;
+    uint32_t mapped = random % range;
+    return (int)mapped + min;
+}

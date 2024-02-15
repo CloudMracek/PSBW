@@ -7,6 +7,7 @@
 #include <ps1/registers.h>
 
 void Sprite::execute(GameObject* parent) {
+
     uint32_t* ptr;
     if(Type == SPRITE_TYPE_FLAT_COLOR) {
         ptr = dma_get_chain_pointer(3);
