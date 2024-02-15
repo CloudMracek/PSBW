@@ -15,7 +15,7 @@ extern "C" {
 }
 // FIX: slower but fixes uploading textures whose size is not a multiple of 16 words
 #define DMA_MAX_CHUNK_SIZE 1
-#define CHAIN_BUFFER_SIZE 1024
+#define CHAIN_BUFFER_SIZE 4096
 
 
 typedef struct {
@@ -215,8 +215,6 @@ void draw_update() {
 		entry->object->execute();
 		entry = entry->next;
 	}
-
-	printString(140,110,"AHOOOOOJ");
 
 	*(chain->nextPacket) = gp0_endTag(0);
 	gpu_gp0_wait_ready();
