@@ -58,6 +58,25 @@ char *gameOverBuf;
 Sprite *renderArray[FIELD_ROWS][FIELD_COLS];
 BlockColor gameArray[FIELD_ROWS + 4][FIELD_COLS];
 
+
+int8_t blockX = 3;
+int8_t blockY = 0;
+uint8_t blockType = randint(0, 6);
+uint8_t fallTimer = 0;
+uint8_t fallDelay = 25;
+
+uint8_t currentDelay = 25;
+
+uint8_t currentRotation = 0;
+
+uint8_t buttonLeftTimeout, buttonRightTimeout = 0;
+uint8_t buttonLeftTimer, buttonRightTimer = 0;
+
+bool rotatePrevious = false;
+bool buttonLeftFast, buttonRightFast = false;
+
+unsigned int currentScore = 0;
+
 void game_setup()
 {
 
@@ -153,10 +172,8 @@ void game_setup()
     psbw_load_scene(scene1);
 }
 
-void render_piece(int8_t x, int8_t y, uint8_t blockType, uint8_t rotation)
-{
-
-    BlockColor(*piece)[4][4]; // Define a pointer to a 4x4  renderArray of BlockColor
+BlockColor (*get_block_arrray(uint8_t blockType, uint8_t rotation))[4][4] {
+    BlockColor (*piece)[4][4]; // Define a pointer to a 4x4  renderArray of BlockColor
 
     switch (blockType)
     {
@@ -189,9 +206,15 @@ void render_piece(int8_t x, int8_t y, uint8_t blockType, uint8_t rotation)
         break;
 
     default:
-        return;
+        return NULL; // Returning NULL as a default case since the function return type is not void
     }
 
+    return piece;
+}
+
+void render_piece(int8_t x, int8_t y, uint8_t blockType, uint8_t rotation)
+{
+    BlockColor (*piece)[4][4] = get_block_arrray(blockType, rotation);
     for (int row = 0; row < 4; row++)
     {
         for (int col = 0; col < 4; col++)
@@ -308,41 +331,7 @@ void render_game_array()
 
 void project_piece_into_game_array(int8_t x, int8_t y, uint8_t blockType, uint8_t rotation)
 {
-    BlockColor(*piece)[4][4]; // Define a pointer to a 4x4  renderArray of BlockColor
-
-    switch (blockType)
-    {
-    case 0: // I Block
-        piece = &I_block[rotation];
-        break;
-
-    case 1: // J Block
-        piece = &J_block[rotation];
-        break;
-
-    case 2: // L Block
-        piece = &L_block[rotation];
-        break;
-
-    case 3: // O Block
-        piece = &O_block[rotation];
-        break;
-
-    case 4: // S Block
-        piece = &S_block[rotation];
-        break;
-
-    case 5: // T Block
-        piece = &T_block[rotation];
-        break;
-
-    case 6: // Z Block
-        piece = &Z_block[rotation];
-        break;
-
-    default:
-        return;
-    }
+    BlockColor (*piece)[4][4] = get_block_arrray(blockType, rotation);
 
     for (int row = 0; row < 4; row++)
     {
@@ -370,43 +359,9 @@ void clear_render_array()
     }
 }
 
-bool checkCollision(int8_t x, int8_t y, uint8_t blockType, uint8_t rotation)
+bool check_fall_collision(int8_t x, int8_t y, uint8_t blockType, uint8_t rotation)
 {
-    BlockColor(*piece)[4][4]; // Define a pointer to a 4x4  renderArray of BlockColor
-
-    switch (blockType)
-    {
-    case 0: // I Block
-        piece = &I_block[rotation];
-        break;
-
-    case 1: // J Block
-        piece = &J_block[rotation];
-        break;
-
-    case 2: // L Block
-        piece = &L_block[rotation];
-        break;
-
-    case 3: // O Block
-        piece = &O_block[rotation];
-        break;
-
-    case 4: // S Block
-        piece = &S_block[rotation];
-        break;
-
-    case 5: // T Block
-        piece = &T_block[rotation];
-        break;
-
-    case 6: // Z Block
-        piece = &Z_block[rotation];
-        break;
-
-    default:
-        return NULL;
-    }
+    BlockColor (*piece)[4][4] = get_block_arrray(blockType, rotation);
 
     for (int row = 0; row < 4; row++)
     {
@@ -427,60 +382,9 @@ bool checkCollision(int8_t x, int8_t y, uint8_t blockType, uint8_t rotation)
     return false;
 }
 
-
-int8_t blockX = 3;
-int8_t blockY = 0;
-uint8_t blockType = randint(0, 6);
-uint8_t fallTimer = 0;
-uint8_t fallDelay = 25;
-
-uint8_t currentDelay = 25;
-
-uint8_t currentRotation = 0;
-
-uint8_t buttonLeftTimeout, buttonRightTimeout = 0;
-uint8_t buttonLeftTimer, buttonRightTimer = 0;
-
-bool rotatePrevious = false;
-bool buttonLeftFast, buttonRightFast = false;
-
-bool checkRotationCollision(int8_t x, int8_t y, uint8_t blockType, uint8_t rotation)
+bool check_rotation_position(int8_t x, int8_t y, uint8_t blockType, uint8_t rotation)
 {
-    BlockColor(*piece)[4][4]; // Define a pointer to a 4x4  renderArray of BlockColor
-
-    switch (blockType)
-    {
-    case 0: // I Block
-        piece = &I_block[rotation];
-        break;
-
-    case 1: // J Block
-        piece = &J_block[rotation];
-        break;
-
-    case 2: // L Block
-        piece = &L_block[rotation];
-        break;
-
-    case 3: // O Block
-        piece = &O_block[rotation];
-        break;
-
-    case 4: // S Block
-        piece = &S_block[rotation];
-        break;
-
-    case 5: // T Block
-        piece = &T_block[rotation];
-        break;
-
-    case 6: // Z Block
-        piece = &Z_block[rotation];
-        break;
-
-    default:
-        return NULL;
-    }
+    BlockColor (*piece)[4][4] = get_block_arrray(blockType, rotation);
 
     bool colliding = false;
     for (int row = 0; row < 4; row++)
@@ -501,21 +405,21 @@ bool checkRotationCollision(int8_t x, int8_t y, uint8_t blockType, uint8_t rotat
     }
 
     if(colliding && x < 5) {
-        if(!checkCollision(x+1, y, blockType, rotation)) {
+        if(!check_fall_collision(x+1, y, blockType, rotation)) {
             blockX++;
             return false;
         }
-        else if(!checkCollision(x+2, y, blockType, rotation)) {
+        else if(!check_fall_collision(x+2, y, blockType, rotation)) {
             blockX += 2;
             return false;
         }
     }
     else if(colliding && x >= 5) {
-        if(!checkCollision(x-1, y, blockType, rotation)) {
+        if(!check_fall_collision(x-1, y, blockType, rotation)) {
             blockX--;
             return false;
         }
-        else if(!checkCollision(x-2, y, blockType, rotation)) {
+        else if(!check_fall_collision(x-2, y, blockType, rotation)) {
             blockX -= 2;
             return false;
         }
@@ -523,10 +427,9 @@ bool checkRotationCollision(int8_t x, int8_t y, uint8_t blockType, uint8_t rotat
     return colliding;
 }
 
-
 void move_left()
 {
-    if (!checkCollision(blockX - 1, blockY, blockType, currentRotation))
+    if (!check_fall_collision(blockX - 1, blockY, blockType, currentRotation))
     {
         blockX--;
     }
@@ -534,13 +437,12 @@ void move_left()
 
 void move_right()
 {
-    if (!checkCollision(blockX + 1, blockY, blockType, currentRotation))
+    if (!check_fall_collision(blockX + 1, blockY, blockType, currentRotation))
     {
         blockX++;
     }
 }
 
-int currentScore = 0;
 void check_full_lines()
 {
     int i, j, k;
@@ -661,7 +563,7 @@ void game_loop()
         if (!rotatePrevious)
         {
             rotatePrevious = true;
-            if (!checkRotationCollision(blockX, blockY, blockType, (currentRotation + 1) % 4))
+            if (!check_rotation_position(blockX, blockY, blockType, (currentRotation + 1) % 4))
             {
                 currentRotation = (currentRotation + 1) % 4;
             }
@@ -685,7 +587,7 @@ void game_loop()
     if (fallTimer >= fallDelay)
     {
         fallTimer = 0;
-        if (checkCollision(blockX, blockY + 1, blockType, currentRotation))
+        if (check_fall_collision(blockX, blockY + 1, blockType, currentRotation))
         {
             project_piece_into_game_array(blockX, blockY, blockType, currentRotation);
             check_full_lines();
