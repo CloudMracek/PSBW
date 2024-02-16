@@ -17,9 +17,12 @@
 #include <stdatomic.h>
 #include <stdbool.h>
 #include <stdint.h>
+
 #include "ps1/cop0gte.h"
 #include "ps1/registers.h"
 #include "ps1/system.h"
+
+#include "psbw/vsync.h"
 
 #define BIOS_ENTRY_POINT ((VoidFunction)0xbfc00000)
 #define BIOS_API_TABLE ((VoidFunction *)0x80000200)
@@ -171,7 +174,10 @@ void switchThread(Thread *thread)
 	atomic_signal_fence(memory_order_release);
 }
 
-uint32_t m_seed = 2891583007UL;
+unsigned int m_seed = 498451;
+uint32_t update_random_seed() {
+	m_seed = VSync(-1);
+}
 
 uint32_t rand()
 {

@@ -144,12 +144,10 @@ int8_t Controller::GetButton(ControllerButton button) {
 
     if(respLength < 4) {
         // No controller is connected
-        return -1;
+        return 0;
     }
-
     // bytes 2 and 3 contain a bitfield of all the button states (inverted)
     uint16_t buttons = (response[2] | (response[3] << 8)) ^ 0xffff;
-
     // return button state
     return (buttons & button) ? 1 : 0;
 

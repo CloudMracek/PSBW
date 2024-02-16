@@ -8,7 +8,7 @@
 #include "psbw/cdrom.h"
 #include <ps1/registers.h>
 
-#define DATA_SYNC_TIMEOUT	0x100000
+#define DATA_SYNC_TIMEOUT 0x100000
 
 /* Unlock command strings */
 
@@ -19,27 +19,26 @@ static const char *_unlock_strings[] = {
 	"Computer",
 	"Entertainment",
 	"",
-	""
-};
+	""};
 
 static const char *const _unlock_regions[] = {
 	"of America", // CdlRegionSCEA
-	"(Europe)",   // CdlRegionSCEE
+	"(Europe)",	  // CdlRegionSCEE
 	"World wide"  // CdlRegionSCEW
 };
 
-uint8_t cdda_loop = 0, cdda_current_track = 0;
+uint8_t cdda_loop = 0, cdda_current_track = -1;
 
 /* Sector DMA transfer functions */
 
-int CdGetSector(void *madr, int size) {
-	
+int CdGetSector(void *madr, int size)
+{
 
-	//while (!(CDROM_REG(0) & (1 << 6)))
-		//__asm__ volatile("");
+	// while (!(CDROM_REG(0) & (1 << 6)))
+	//__asm__ volatile("");
 
-	DMA_MADR(DMA_CDROM) = (uint32_t) madr;
-	DMA_BCR(DMA_CDROM)  = size | (1 << 16);
+	DMA_MADR(DMA_CDROM) = (uint32_t)madr;
+	DMA_BCR(DMA_CDROM) = size | (1 << 16);
 	DMA_CHCR(DMA_CDROM) = 0x11000000;
 
 	while (DMA_CHCR(DMA_CDROM) & (1 << 24))
@@ -48,24 +47,26 @@ int CdGetSector(void *madr, int size) {
 	return 1;
 }
 
-int CdGetSector2(void *madr, int size) {
-	
+int CdGetSector2(void *madr, int size)
+{
 
-	//while (!(CDROM_REG(0) & (1 << 6)))
-		//__asm__ volatile("");
+	// while (!(CDROM_REG(0) & (1 << 6)))
+	//__asm__ volatile("");
 
-	DMA_MADR(DMA_CDROM) = (uint32_t) madr;
-	DMA_BCR(DMA_CDROM)  = size | (1 << 16);
+	DMA_MADR(DMA_CDROM) = (uint32_t)madr;
+	DMA_BCR(DMA_CDROM) = size | (1 << 16);
 	DMA_CHCR(DMA_CDROM) = 0x11400100; // Transfer 1 word every 16 CPU cycles
 
 	return 1;
 }
 
-int CdDataSync(int mode) {
+int CdDataSync(int mode)
+{
 	if (mode)
 		return (DMA_CHCR(DMA_CDROM) >> 24) & 1;
 
-	for (int i = DATA_SYNC_TIMEOUT; i; i--) {
+	for (int i = DATA_SYNC_TIMEOUT; i; i--)
+	{
 		if (!(DMA_CHCR(DMA_CDROM) & (1 << 24)))
 			return 0;
 	}
@@ -76,7 +77,8 @@ int CdDataSync(int mode) {
 
 /* LBA/MSF conversion */
 
-CdlLOC *CdIntToPos(int i, CdlLOC *p) {
+CdlLOC *CdIntToPos(int i, CdlLOC *p)
+{
 	i += 150;
 
 	p->minute = itob(i / (75 * 60));
@@ -85,17 +87,19 @@ CdlLOC *CdIntToPos(int i, CdlLOC *p) {
 	return p;
 }
 
-int CdPosToInt(const CdlLOC *p) {	
+int CdPosToInt(const CdlLOC *p)
+{
 	return (
-		(btoi(p->minute) * (75 * 60)) +
-		(btoi(p->second) * 75) +
-		btoi(p->sector)
-	) - 150;
+			   (btoi(p->minute) * (75 * 60)) +
+			   (btoi(p->second) * 75) +
+			   btoi(p->sector)) -
+		   150;
 }
 
 /* Drive unlocking API */
 
-CdlRegionCode CdGetRegion(void) {
+CdlRegionCode CdGetRegion(void)
+{
 	uint8_t param;
 	uint8_t result[16];
 
@@ -107,7 +111,8 @@ CdlRegionCode CdGetRegion(void) {
 	param = 0x20;
 	memset(result, 0, 4);
 
-	if (!CdCommand(CdlTest, &param, 1, result)) {
+	if (!CdCommand(CdlTest, &param, 1, result))
+	{
 		printf("failed to probe drive firmware version\n");
 		return CdlRegionUnknown;
 	}
@@ -121,7 +126,8 @@ CdlRegionCode CdGetRegion(void) {
 	param = 0x22;
 	memset(result, 0, 16);
 
-	if (!CdCommand(CdlTest, &param, 1, result)) {
+	if (!CdCommand(CdlTest, &param, 1, result))
+	{
 		printf("failed to probe drive region\n");
 		return CdlRegionUnknown;
 	}
@@ -141,7 +147,8 @@ CdlRegionCode CdGetRegion(void) {
 	return CdlRegionUnknown;
 }
 
-int CdUnlock(CdlRegionCode region) {
+int CdUnlock(CdlRegionCode region)
+{
 	if (region <= CdlRegionSCEI)
 		return 0;
 	if (region >= CdlRegionDebug)
@@ -150,18 +157,19 @@ int CdUnlock(CdlRegionCode region) {
 	// This is by far the most efficient way to do it.
 	_unlock_strings[5] = _unlock_regions[region - CdlRegionSCEA];
 
-	for (int i = 0; i < 7; i++) {
+	for (int i = 0; i < 7; i++)
+	{
 		uint8_t result[4];
 
 		if (!CdCommand(
-			0x50 + i,
-			_unlock_strings[i],
-			strlen(_unlock_strings[i]),
-			result
-		))
+				0x50 + i,
+				_unlock_strings[i],
+				strlen(_unlock_strings[i]),
+				result))
 			return 0;
 
-		if (!(result[0] & CdlStatError) || (result[1] != 0x40)) {
+		if (!(result[0] & CdlStatError) || (result[1] != 0x40))
+		{
 			printf("unlock failed, status=0x%02x, code=0x%02x\n", result[0], result[1]);
 			return 0;
 		}
@@ -173,8 +181,8 @@ int CdUnlock(CdlRegionCode region) {
 
 /* Misc. functions */
 
-int CdGetToc(CdlLOC *toc) {
-	
+int CdGetToc(CdlLOC *toc)
+{
 
 	uint8_t result[4];
 
@@ -183,11 +191,12 @@ int CdGetToc(CdlLOC *toc) {
 	if (CdSync(1, 0) != CdlComplete)
 		return 0;
 
-	int first  = btoi(result[1]);
+	int first = btoi(result[1]);
 	int tracks = btoi(result[2]) + 1 - first;
-	//assert(first == 1);
+	// assert(first == 1);
 
-	for (int i = 0; i < tracks; i++) {
+	for (int i = 0; i < tracks; i++)
+	{
 		uint8_t track = itob(first + i);
 
 		if (!CdCommand(CdlGetTD, &track, 1, result))
@@ -198,14 +207,14 @@ int CdGetToc(CdlLOC *toc) {
 		toc[i].minute = result[1];
 		toc[i].second = result[2];
 		toc[i].sector = 0;
-		toc[i].track  = track;
+		toc[i].track = track;
 	}
 
 	return tracks;
 }
 
-int CdMix(const CdlATV *vol) {
-	
+int CdMix(const CdlATV *vol)
+{
 
 	CDROM_REG(0) = 2;
 	CDROM_REG(2) = vol->val0;
@@ -219,27 +228,32 @@ int CdMix(const CdlATV *vol) {
 	return 1;
 }
 
-void _cdda_end_callback() {
-	if(cdda_loop) {
+void _cdda_end_callback()
+{
+	if (cdda_loop)
+	{
 		CdPlayCdda(cdda_current_track, 1);
 	}
 	return;
 }
 
 int first = 1;
+
+void CdReplayCdda()
+{
+	if (cdda_current_track != -1)
+	{
+		CdPlayCdda(cdda_current_track, cdda_loop);
+	}
+}
+
 void CdPlayCdda(int track, int loop)
 {
-	if(cdda_current_track != track || cdda_loop == 0) {
-		first = 1;
-	}
 
-	if(first) {
-		uint8_t _mode = CdlModeAP;
-		CdCommand(CdlSetmode, &_mode, 1, 0);
-		CdAutoPauseCallback(_cdda_end_callback);
-		first = 0;
-	}
-	
+	uint8_t _mode = CdlModeAP;
+	CdCommand(CdlSetmode, &_mode, 1, 0);
+	CdAutoPauseCallback(_cdda_end_callback);
+
 	cdda_loop = loop;
 	int param = track;
 	uint8_t result[16];
@@ -250,6 +264,6 @@ void CdPlayCdda(int track, int loop)
 void CdStopCdda()
 {
 	cdda_loop = 0;
-	cdda_current_track = 0;
+	cdda_current_track = -1;
 	CdCommand(CdlPause, 0, 0, 0);
 }

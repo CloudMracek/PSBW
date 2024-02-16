@@ -1144,6 +1144,7 @@ int CdLoadSession(int session);
 
 void CdPlayCdda(int track, int loop);
 void CdStopCdda();
+void CdReplayCdda();
 
 #ifdef __cplusplus
 }

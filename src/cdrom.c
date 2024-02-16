@@ -94,6 +94,9 @@ static void _update_status(uint8_t status) {
 		printf("shell opened, invalidating cache\n");
 		_cd_media_changed = 1;
 	}
+	else if (!(last & CdlStatShellOpen) && (status & CdlStatShellOpen)) {
+		CdReplayCdda();
+	}
 }
 
 static void _cd_irq_handler(void) {
