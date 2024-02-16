@@ -1,0 +1,30 @@
+# This starter workflow is for a CMake project running on a single platform. There is a different starter workflow if you need cross-platform coverage.
+# See: https://github.com/actions/starter-workflows/blob/main/ci/cmake-multi-platform.yml
+name: CMake build
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Spawn toolchain
+      run: curl https://raw.githubusercontent.com/grumpycoders/pcsx-redux/main/tools/linux-mips/spawn-compiler.sh | sh
+
+    - name: Install prerequisities
+      run: pip3 install -r tools/requirements.txt 
+      
+    - name: Configure CMake
+      run: cmake --preset debug ${{github.workspace}}
+
+    - name: Build
+      # Build your program with the given configuration
+      run: cmake --build ${{github.workspace}}/build
+
