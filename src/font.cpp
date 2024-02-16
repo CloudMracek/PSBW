@@ -122,7 +122,7 @@ void setFont(Texture* texture) {
 	_font = texture;
 }
 
-void printString(int x, int y, const char *str) {
+void printString(int x, int y, char *str) {
 	int currentX = x, currentY = y;
 
 	uint32_t *ptr;
@@ -135,9 +135,10 @@ void printString(int x, int y, const char *str) {
 	ptr[0] = gp0_texpage(_font->page, false, false);
 
 	// Iterate over every character in the string.
-	for (; *str; str++) {
+	for (;;) {
 		char ch = *str;
-
+		if (ch == '\0')
+            break;
 		// Check if the character is "special" and shall be handled without
 		// drawing any sprite, or if it's invalid and should be rendered as a
 		// box with a question mark (character code 127).
@@ -145,15 +146,18 @@ void printString(int x, int y, const char *str) {
 			case '\t':
 				currentX += FONT_TAB_WIDTH - 1;
 				currentX -= currentX % FONT_TAB_WIDTH;
+				str++;
 				continue;
 
 			case '\n':
 				currentX  = x;
 				currentY += FONT_LINE_HEIGHT;
+				str++;
 				continue;
 
 			case ' ':
 				currentX += FONT_SPACE_WIDTH;
+				str++;
 				continue;
 
 			case '\x80' ... '\xff':
@@ -177,5 +181,6 @@ void printString(int x, int y, const char *str) {
 
 		// Move onto the next character.
 		currentX += sprite->width;
+		str++;
 	}
 }

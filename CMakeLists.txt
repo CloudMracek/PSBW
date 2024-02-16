@@ -74,6 +74,7 @@ add_executable(${PROJECT_NAME}
 	src/Scene.cpp
 	src/GameObject.cpp 
 	src/Sprite.cpp 
+	src/Text.cpp
 	src/manager.cpp 
 	src/Controller.cpp 
 	src/Sound.cpp 

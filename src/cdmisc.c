@@ -28,7 +28,7 @@ static const char *const _unlock_regions[] = {
 	"World wide"  // CdlRegionSCEW
 };
 
-uint8_t cdda_loop, cdda_current_track = 0;
+uint8_t cdda_loop = 0, cdda_current_track = 0;
 
 /* Sector DMA transfer functions */
 
@@ -223,13 +223,23 @@ void _cdda_end_callback() {
 	if(cdda_loop) {
 		CdPlayCdda(cdda_current_track, 1);
 	}
+	return;
 }
 
+int first = 1;
 void CdPlayCdda(int track, int loop)
 {
-	uint8_t _mode = CdlModeAP | CdlModeDA;
-	CdCommand(CdlSetmode, &_mode, 1, 0);
-	CdAutoPauseCallback(_cdda_end_callback);
+	if(cdda_current_track != track || cdda_loop == 0) {
+		first = 1;
+	}
+
+	if(first) {
+		uint8_t _mode = CdlModeAP;
+		CdCommand(CdlSetmode, &_mode, 1, 0);
+		CdAutoPauseCallback(_cdda_end_callback);
+		first = 0;
+	}
+	
 	cdda_loop = loop;
 	int param = track;
 	uint8_t result[16];

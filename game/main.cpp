@@ -8,6 +8,7 @@
 #include <psbw/Texture.h>
 #include <psbw/Controller.h>
 #include <psbw/Sound.h>
+#include <psbw/Text.h>
 #include "psbw/fudgebundle.h"
 #include "psbw/font.h"
 #include "ps1/system.h"
@@ -19,25 +20,31 @@ extern "C"
 #include "stdlib.h"
 }
 
-#include <vendor/printf.h>
 #include <stdio.h>
 
 #include "game/game.h"
 
 #include "pieces.h"
+#include "psbw/draw.h"
 
 Scene *scene1;
 
 GameObject *fieldBackground, *fieldBorder;
 Sprite *spriteFbg, *spriteFborder;
 
-Texture *blue, *green, *orange, *purple, *red, *turqoise, *yellow;
+Texture *blue, *green, *orange, *purple, *red, *turqoise, *yellow, *font;
 
 Controller *controller1;
 
 FDG_HASH_ENTRY *entry;
 
 CdlFILE file;
+
+bool gameOver = false;
+
+char *score;
+char *about;
+char *gameOverBuf;
 
 #define FIELD_X 110
 #define FIELD_Y 20
@@ -75,6 +82,10 @@ void game_setup()
     red = fdg->fudgebundle_get_texture(fdg_hash("red"));
     turqoise = fdg->fudgebundle_get_texture(fdg_hash("turqoise"));
     yellow = fdg->fudgebundle_get_texture(fdg_hash("yellow"));
+
+    font = fdg->fudgebundle_get_texture(fdg_hash("font"));
+
+    setFont(font);
 
     spriteFborder = new Sprite(SPRITE_TYPE_FLAT_COLOR);
     spriteFborder->Color = {255, 255, 255};
@@ -116,6 +127,27 @@ void game_setup()
             gameArray[i][j] = Empty;
         }
     }
+
+    about = (char*)malloc(50);
+    score = (char*)malloc(50);
+    gameOverBuf = (char*) malloc(50);
+
+    GameObject *objAbout = new GameObject(20,20,0);
+    Text *text = new Text();
+    text->text = about;
+    objAbout->addComponent(text);
+
+    GameObject *objScore = new GameObject(230,20,0);
+    Text *scoreText = new Text();
+    scoreText->text = score;
+    objScore->addComponent(scoreText);
+
+    sprintf(about, "PSXRIS\nMADE BY\nBANDWIDTH");
+    sprintf(score, "SCORE: 0");
+    sprintf(gameOverBuf, "GAME\nOVER!");
+
+    scene1->addGameObject(objAbout);
+    scene1->addGameObject(objScore);
 
     sound_play_cdda(2, 1);
     psbw_load_scene(scene1);
@@ -319,6 +351,9 @@ void project_piece_into_game_array(int8_t x, int8_t y, uint8_t blockType, uint8_
             BlockColor blockColor = (*piece)[row][col];
             if (blockColor == Empty)
                 continue;
+            if((row+y) < 4) { 
+                gameOver = true;
+            }
             gameArray[row + y][col + x] = blockColor;
         }
     }
@@ -392,6 +427,7 @@ bool checkCollision(int8_t x, int8_t y, uint8_t blockType, uint8_t rotation)
     return false;
 }
 
+
 int8_t blockX = 3;
 int8_t blockY = 0;
 uint8_t blockType = randint(0, 6);
@@ -407,6 +443,86 @@ uint8_t buttonLeftTimer, buttonRightTimer = 0;
 
 bool rotatePrevious = false;
 bool buttonLeftFast, buttonRightFast = false;
+
+bool checkRotationCollision(int8_t x, int8_t y, uint8_t blockType, uint8_t rotation)
+{
+    BlockColor(*piece)[4][4]; // Define a pointer to a 4x4  renderArray of BlockColor
+
+    switch (blockType)
+    {
+    case 0: // I Block
+        piece = &I_block[rotation];
+        break;
+
+    case 1: // J Block
+        piece = &J_block[rotation];
+        break;
+
+    case 2: // L Block
+        piece = &L_block[rotation];
+        break;
+
+    case 3: // O Block
+        piece = &O_block[rotation];
+        break;
+
+    case 4: // S Block
+        piece = &S_block[rotation];
+        break;
+
+    case 5: // T Block
+        piece = &T_block[rotation];
+        break;
+
+    case 6: // Z Block
+        piece = &Z_block[rotation];
+        break;
+
+    default:
+        return NULL;
+    }
+
+    bool colliding = false;
+    for (int row = 0; row < 4; row++)
+    {
+        for (int col = 0; col < 4; col++)
+        {
+            BlockColor blockColor = (*piece)[row][col];
+            if (blockColor == Empty)
+                continue;
+            if (y + row > FIELD_ROWS + 3)
+                colliding = true;
+            if (x + col > FIELD_COLS - 1 || x + col < 0)
+                colliding = true;
+            BlockColor gameArrrayBlockColor = gameArray[y + row][x + col];
+            if (gameArrrayBlockColor != Empty)
+                colliding = true;
+        }
+    }
+
+    if(colliding && x < 5) {
+        if(!checkCollision(x+1, y, blockType, rotation)) {
+            blockX++;
+            return false;
+        }
+        else if(!checkCollision(x+2, y, blockType, rotation)) {
+            blockX += 2;
+            return false;
+        }
+    }
+    else if(colliding && x >= 5) {
+        if(!checkCollision(x-1, y, blockType, rotation)) {
+            blockX--;
+            return false;
+        }
+        else if(!checkCollision(x-2, y, blockType, rotation)) {
+            blockX -= 2;
+            return false;
+        }
+    }
+    return colliding;
+}
+
 
 void move_left()
 {
@@ -424,9 +540,11 @@ void move_right()
     }
 }
 
+int currentScore = 0;
 void check_full_lines()
 {
     int i, j, k;
+    int foundFull = 0;
 
     for (i = 0; i < FIELD_ROWS + 4; i++)
     {
@@ -441,6 +559,7 @@ void check_full_lines()
         }
         if (full_row)
         {
+            foundFull++;
             if (currentDelay > 5)
                 currentDelay = currentDelay - 2;
             // Clear the full row
@@ -463,10 +582,31 @@ void check_full_lines()
             }
         }
     }
+
+    if(foundFull != 0) {
+        int multiplier = 1;
+        for(int i = 0; i < foundFull; i++) {
+            multiplier*=2;
+        }
+        currentScore+=(100*multiplier);
+        sprintf(score, "SCORE: %d", currentScore);
+    }
 }
 
 void game_loop()
 {
+
+    if(gameOver) {
+        clear_render_array();
+        GameObject *gameOverObj = new GameObject(150, 30, 0);
+        Text *text = new Text();
+        
+        text->text = gameOverBuf;
+        gameOverObj->addComponent(text);
+        scene1->addGameObject(gameOverObj);
+        draw_update();
+        while(1);
+    }
 
     if (controller1->GetButton(Left))
     {
@@ -521,7 +661,7 @@ void game_loop()
         if (!rotatePrevious)
         {
             rotatePrevious = true;
-            if (!checkCollision(blockX, blockY, blockType, (currentRotation + 1) % 4))
+            if (!checkRotationCollision(blockX, blockY, blockType, (currentRotation + 1) % 4))
             {
                 currentRotation = (currentRotation + 1) % 4;
             }

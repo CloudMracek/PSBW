@@ -12,8 +12,6 @@ static void _interruptHandler() {
     if(acknowledgeInterrupt(IRQ_VSYNC)) {
         vsyncCallback();
     }
-    // This is ugly but so are deadlines
-    enableInterrupts();
 }
 
 void interrupt_init() {
