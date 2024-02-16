@@ -14,7 +14,12 @@ jobs:
     
     steps:
     - uses: actions/checkout@v3
+      with:
+        submodules: recursive
     - uses: seanmiddleditch/gha-setup-ninja@master
+
+      
+
 
     - name: Spawn toolchain
       run: curl https://raw.githubusercontent.com/grumpycoders/pcsx-redux/main/tools/linux-mips/spawn-compiler.sh | sudo sh
