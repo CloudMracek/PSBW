@@ -2,6 +2,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <ps1/system.h>
 #include <ps1/registers.h>
 #include <ps1/gpucmd.h>
@@ -48,8 +49,11 @@ Fudgebundle::Fudgebundle(uint8_t *data) {
 
 int Fudgebundle::_fudgebundle_load(uint8_t* data) {
     _fdg_index = (FDG_INDEX*) data;
-    _hash_table = (FDG_HASH_ENTRY*) (data+32);
-    _ram_data = data+_fdg_index->indexLength+_fdg_index->vramLength+_fdg_index->spuLength;
+
+    // Copy over RAM section
+    uint8_t* temp_ram_data = data+_fdg_index->indexLength+_fdg_index->vramLength+_fdg_index->spuLength;
+    _ram_data = (uint8_t*) malloc(_fdg_index->ramLength);
+    memcpy(_ram_data, temp_ram_data, _fdg_index->ramLength);
 
     if(strncmp(_fdg_index->magic, "fudgebn", 7)) {
         printf("Couldn't read fudgebundle magic.");
@@ -86,6 +90,14 @@ int Fudgebundle::_fudgebundle_load(uint8_t* data) {
 
     // Upload SPU samples
     spu_upload(data+_fdg_index->indexLength+_fdg_index->vramLength, _fdg_index->spuLength);
+
+
+    unsigned int indexSize = _fdg_index->indexLength;
+    _fdg_index = (FDG_INDEX*) malloc(indexSize);
+    memcpy(_fdg_index, data, indexSize);
+    _hash_table = (FDG_HASH_ENTRY*) (((uint8_t*)_fdg_index)+32);
+    free(data); 
+
     return 0;
 }
 

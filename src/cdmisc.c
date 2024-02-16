@@ -237,8 +237,6 @@ void _cdda_end_callback()
 	return;
 }
 
-int first = 1;
-
 void CdReplayCdda()
 {
 	if (cdda_current_track != -1)
@@ -247,13 +245,20 @@ void CdReplayCdda()
 	}
 }
 
+int first = 1;
 void CdPlayCdda(int track, int loop)
 {
+	if(cdda_current_track != track || cdda_loop == 0) {
+		first = 1;
+	}
 
-	uint8_t _mode = CdlModeAP;
-	CdCommand(CdlSetmode, &_mode, 1, 0);
-	CdAutoPauseCallback(_cdda_end_callback);
-
+	if(first) {
+		uint8_t _mode = CdlModeAP;
+		CdCommand(CdlSetmode, &_mode, 1, 0);
+		CdAutoPauseCallback(_cdda_end_callback);
+		first = 0;
+	}
+	
 	cdda_loop = loop;
 	int param = track;
 	uint8_t result[16];
