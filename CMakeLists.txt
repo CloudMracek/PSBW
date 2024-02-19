@@ -87,11 +87,11 @@ add_executable(${PROJECT_NAME}
 	src/psbw/GameObject.cpp 
 	src/psbw/Sprite.cpp 
 	src/psbw/Text.cpp
-	src/psbw/manager.cpp 
+	src/psbw/Manager.cpp 
 	src/psbw/Controller.cpp 
 	src/psbw/Sound.cpp 
 	src/psbw/Fudgebundle.cpp
-	src/psbw/font.cpp
+	src/psbw/Font.cpp
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE ${GAME_NAME} common)
 target_include_directories(${PROJECT_NAME} PUBLIC inc)
