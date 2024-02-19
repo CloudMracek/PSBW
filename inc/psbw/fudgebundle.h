@@ -38,7 +38,8 @@ typedef struct [[gnu::packed]] FDG_HASH_ENTRY
 
 class Fudgebundle {
     public:
-        Fudgebundle(uint8_t* data);
+        Fudgebundle(char* filename);
+        ~Fudgebundle();
         Texture *fudgebundle_get_texture(uint32_t hash);
         Sound *fudgebundle_get_sound(uint32_t hash);
         Vector2D *fudgebundle_get_background(uint32_t hash);

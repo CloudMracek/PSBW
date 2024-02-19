@@ -4,11 +4,7 @@
 #include "ps1/registers.h"
 #include "vendor/printf.h"
 
-extern "C"
-{
 #include "cdrom.h"
-#include "psbw/Sound.h"
-}
 
 #define _min(x, y) (((x) < (y)) ? (x) : (y))
 #define getSPUAddr(addr) ((uint16_t)(((addr) + 7) / 8))
@@ -231,12 +227,12 @@ void Sound::play()
 	SpuSetKey(1, 1 << ch);
 }
 
-void sound_play_cdda(int track, int loop)
+void soundPlayCdda(int track, int loop)
 {
 	CdPlayCdda(track, loop);
 }
 
-void sound_stop_cdda()
+void soundPlayCdda()
 {
 	CdStopCdda();
 }

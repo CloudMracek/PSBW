@@ -7,10 +7,10 @@ void spu_init();
 void spu_upload(const void *data, size_t size);
 
 /// @brief Plays an audio track from the CDROM
-void sound_play_cdda(int track, int loop);
+void soundPlayCdda(int track, int loop);
 
 /// @brief Stops CDROM audio playback
-void sound_stop_cdda();
+void soundPlayCdda();
 
 void spu_play_sample(int addr, int sample_rate);
 

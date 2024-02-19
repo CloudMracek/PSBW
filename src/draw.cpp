@@ -6,15 +6,13 @@
 #include <ps1/registers.h>
 #include <ps1/system.h>
 
+#include "vsync.h"
+
 #include "psbw/Sprite.h"
 #include "psbw/GameObject.h"
 #include "psbw/Texture.h"
 #include "psbw/Font.h"
 
-extern "C"
-{
-#include "vsync.h"
-}
 // FIX: slower but fixes uploading textures whose size is not a multiple of 16 words
 #define DMA_MAX_CHUNK_SIZE 1
 #define CHAIN_BUFFER_SIZE 4096
@@ -32,6 +30,7 @@ Scene *activeScene;
 void load_scene(Scene *scene)
 {
 	activeScene = scene;
+	activeScene->sceneSetup();
 }
 
 // Private util functions
@@ -202,6 +201,9 @@ bool currentBuffer = false;
 DMAChain dmaChains[2];
 void draw_update()
 {
+
+	activeScene->sceneLoop();
+
 	int frameX = currentBuffer ? SCREEN_WIDTH : 0;
 	int frameY = 0;
 

@@ -2,6 +2,10 @@
 
 #include "psbw/Font.h"
 
+void Text::setFont(Font* font) {
+    _fnt = font;
+}
+
 void Text::execute(GameObject* parent) {
-    printString(parent->position.x, parent->position.y, text);
+    _fnt->printString(parent->position.x, parent->position.y, text);
 }

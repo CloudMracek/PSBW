@@ -1,4 +1,4 @@
-#include "psbw/fudgebundle.h"
+#include "psbw/Fudgebundle.h"
 
 #include <string.h>
 #include <stdio.h>
@@ -9,6 +9,8 @@
 #include <ps1/gpucmd.h>
 
 #include "draw.h"
+#include "cdrom.h"
+#include "cdread.h"
 
 #include "psbw/Sound.h"
 
@@ -50,8 +52,22 @@ uint32_t fdg_hash(const char *str) {
     return value;
 }
 
-Fudgebundle::Fudgebundle(uint8_t *data) {
-    _fudgebundle_load(data);
+Fudgebundle::Fudgebundle(char *filename) {
+    CdlFILE file;
+    CdSearchFile(&file, filename);
+    size_t len = (file.size + 2047) & 0xfffff800;
+    void *_ptr = malloc(len);
+    CdControl(CdlSetloc, &(file.pos), 0);
+    CdRead(len / 2048, (uint32_t *)_ptr, CdlModeSpeed);
+    if (CdReadSync(0, 0) < 0)
+    {
+    }
+    _fudgebundle_load((uint8_t*)_ptr);
+}
+
+Fudgebundle::~Fudgebundle() {
+    free(_ram_data);
+    free(_fdg_index);
 }
 
 int Fudgebundle::_fudgebundle_load(uint8_t* data) {

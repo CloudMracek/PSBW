@@ -4,19 +4,15 @@
 #include "game/game.h"
 
 #include "ps1/system.h"
-#include "draw.h"
 
+#include "draw.h"
+#include "cdrom.h"
+#include "vsync.h"
+#include "interrupts.h"
 
 #include "psbw/Sio.h"
 #include "psbw/Controller.h"
 #include "psbw/Sound.h"
-
-extern "C" {
-#include "cdrom.h"
-#include "vsync.h"
-#include "interrupts.h"
-}
-
 
 void main() {
 	interrupt_init();
@@ -30,7 +26,6 @@ void main() {
 
 	for(;;) {
 		ctrl_update();
-		game_loop();
 		draw_update();
 	}
 }

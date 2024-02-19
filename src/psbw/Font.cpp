@@ -1,3 +1,5 @@
+#include "psbw/Font.h"
+
 #include <stdint.h>
 
 #include <ps1/gpucmd.h>
@@ -8,12 +10,6 @@ typedef struct {
 	uint8_t x, y, width, height;
 } SpriteInfo;
 
-typedef struct {
-	int x,y;
-	const char *str;
-} PrintCommand;
-
-Texture *_font;
 
 static const SpriteInfo fontSprites[] = {
 	{ .x =  6, .y =  0, .width = 2, .height = 9 }, // !
@@ -118,11 +114,11 @@ static const SpriteInfo fontSprites[] = {
 #define FONT_TAB_WIDTH        32
 #define FONT_LINE_HEIGHT      10
 
-void setFont(Texture* texture) {
-	_font = texture;
+Font::Font(Texture* texture) {
+	_tex = texture;
 }
 
-void printString(int x, int y, char *str) {
+void Font::printString(int x, int y, char *str) {
 	int currentX = x, currentY = y;
 
 	uint32_t *ptr;
@@ -132,7 +128,7 @@ void printString(int x, int y, char *str) {
 	// be omitted when reusing the same texture, so sending it here just once is
 	// enough.
 	ptr    = dma_get_chain_pointer(1);
-	ptr[0] = gp0_texpage(_font->page, false, false);
+	ptr[0] = gp0_texpage(_tex->page, false, false);
 
 	// Iterate over every character in the string.
 	for (;;) {
@@ -176,7 +172,7 @@ void printString(int x, int y, char *str) {
 		ptr    = dma_get_chain_pointer(4);
 		ptr[0] = gp0_rectangle(true, true, true);
 		ptr[1] = gp0_xy(currentX, currentY);
-		ptr[2] = gp0_uv(_font->u + sprite->x, _font->v + sprite->y, _font->clut);
+		ptr[2] = gp0_uv(_tex->u + sprite->x, _tex->v + sprite->y, _tex->clut);
 		ptr[3] = gp0_xy(sprite->width, sprite->height);
 
 		// Move onto the next character.

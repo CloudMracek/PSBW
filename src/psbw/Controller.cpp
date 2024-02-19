@@ -1,8 +1,10 @@
 #include "psbw/Controller.h"
+
+#include <string.h>
+
 #include "ps1/registers.h"
 #include "ps1/system.h"
 
-#include <string.h>
 
 void ctrl_init(void) {
 	// Reset the serial interface, initialize it with the settings used by

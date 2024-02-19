@@ -57,6 +57,7 @@ target_include_directories(
 add_library(
 	${GAME_NAME} OBJECT
 	game/main.cpp
+	game/scenes/MainMenu.cpp
 )
 
 target_include_directories(

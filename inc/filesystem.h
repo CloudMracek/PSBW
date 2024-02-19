@@ -1,6 +1,10 @@
 #pragma once
 #include "cdrom.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /// Structure of a double-endian unsigned short word
 typedef struct __attribute__((__packed__)) ISO_USHORT_PAIR
 {
@@ -142,3 +146,7 @@ typedef struct __attribute__((__packed__)) ISO_DESCRIPTOR
 } ISO_DESCRIPTOR;
 
 CdlFILE *CdSearchFile(CdlFILE *fp, const char *filename);
+
+#ifdef __cplusplus
+}
+#endif
