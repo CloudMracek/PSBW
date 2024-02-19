@@ -1,5 +1,5 @@
-#include <psbw/sio.h>
-#include <psbw/manager.h>
+#include <psbw/Sio.h>
+#include <psbw/Manager.h>
 #include <stdint.h>
 
 #include <psbw/Scene.h>
@@ -9,13 +9,13 @@
 #include <psbw/Controller.h>
 #include <psbw/Sound.h>
 #include <psbw/Text.h>
-#include "psbw/fudgebundle.h"
-#include "psbw/font.h"
+#include "psbw/Fudgebundle.h"
+#include "psbw/Font.h"
 #include "ps1/system.h"
 
 extern "C"
 {
-#include <psbw/filesystem.h>
+#include <filesystem.h>
 #include <stdint.h>
 #include "stdlib.h"
 }
@@ -25,7 +25,7 @@ extern "C"
 #include "game/game.h"
 
 #include "pieces.h"
-#include "psbw/draw.h"
+#include "draw.h"
 
 Scene *scene1, *mainMenu;
 

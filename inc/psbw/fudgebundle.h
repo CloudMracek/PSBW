@@ -3,7 +3,7 @@
 
 #include "psbw/Texture.h"
 #include "psbw/Sound.h"
-#include "psbw/vector.h"
+#include "psbw/Vector.h"
 
 typedef struct [[gnu::packed]] FDG_INDEX
 {

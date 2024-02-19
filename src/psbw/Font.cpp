@@ -2,7 +2,7 @@
 
 #include <ps1/gpucmd.h>
 
-#include "psbw/draw.h"
+#include "draw.h"
 
 typedef struct {
 	uint8_t x, y, width, height;

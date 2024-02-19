@@ -3,10 +3,12 @@
  * (C) 2020-2022 Lameguy64, spicyjpeg - MPL licensed
  */
 
+#include "cdrom.h"
+
 #include <stdint.h>
 #include <stdio.h>
-#include "psbw/cdrom.h"
-#include "psbw/interrupts.h"
+
+#include "interrupts.h"
 
 #define CD_ACK_TIMEOUT		0x100000
 #define CD_SYNC_TIMEOUT		0x100000

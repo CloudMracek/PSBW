@@ -1,5 +1,5 @@
 #pragma once
-#include "psbw/cdrom.h"
+#include "cdrom.h"
 
 int CdGetSector(void *madr, int size);
 

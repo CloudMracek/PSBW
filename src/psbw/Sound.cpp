@@ -1,11 +1,12 @@
 #include "psbw/Sound.h"
+
 #include "ps1/system.h"
 #include "ps1/registers.h"
 #include "vendor/printf.h"
 
 extern "C"
 {
-#include "psbw/cdrom.h"
+#include "cdrom.h"
 #include "psbw/Sound.h"
 }
 

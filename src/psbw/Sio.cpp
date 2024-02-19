@@ -1,3 +1,5 @@
+#include "psbw/sio.h"
+
 #include <ps1/registers.h>
 
 static void printCharacter(char ch) {

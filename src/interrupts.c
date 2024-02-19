@@ -1,4 +1,4 @@
-#include "psbw/interrupts.h"
+#include "interrupts.h"
 
 #include <ps1/registers.h>
 

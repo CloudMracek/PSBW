@@ -3,9 +3,11 @@
  * (C) 2020-2022 Lameguy64, spicyjpeg - MPL licensed
  */
 
+#include "cdrom.h"
+
 #include <stdint.h>
 #include <string.h>
-#include "psbw/cdrom.h"
+
 #include <ps1/registers.h>
 
 #define DATA_SYNC_TIMEOUT 0x100000

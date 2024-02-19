@@ -1,18 +1,20 @@
 
 #include <stdio.h>
-#include "ps1/system.h"
+
 #include "game/game.h"
-#include "psbw/draw.h"
+
+#include "ps1/system.h"
+#include "draw.h"
 
 
-#include "psbw/sio.h"
+#include "psbw/Sio.h"
 #include "psbw/Controller.h"
 #include "psbw/Sound.h"
 
 extern "C" {
-#include "psbw/cdrom.h"
-#include "psbw/vsync.h"
-#include "psbw/interrupts.h"
+#include "cdrom.h"
+#include "vsync.h"
+#include "interrupts.h"
 }
 
 

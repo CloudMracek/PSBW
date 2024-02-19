@@ -1,10 +1,12 @@
 #include "psbw/Sprite.h"
-#include "psbw/vector.h"
-#include "psbw/GameObject.h"
-#include "psbw/draw.h"
 
 #include <ps1/gpucmd.h>
 #include <ps1/registers.h>
+
+#include "draw.h"
+
+#include "psbw/vector.h"
+#include "psbw/GameObject.h"
 
 void Sprite::execute(GameObject* parent) {
 

@@ -1,3 +1,4 @@
+#pragma once
 
 // For now only baudrates that are multiples of 16 are supported due to internal timer settings
 #define SIO_BAUD_115200 115200

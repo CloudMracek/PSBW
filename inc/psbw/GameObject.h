@@ -1,6 +1,6 @@
 #pragma once
 
-#include "psbw/vector.h"
+#include "psbw/Vector.h"
 #include "psbw/Component.h"  // Include Component.h as it's used here
 
 /**

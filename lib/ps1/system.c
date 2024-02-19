@@ -22,7 +22,7 @@
 #include "ps1/registers.h"
 #include "ps1/system.h"
 
-#include "psbw/vsync.h"
+#include "vsync.h"
 
 #define BIOS_ENTRY_POINT ((VoidFunction)0xbfc00000)
 #define BIOS_API_TABLE ((VoidFunction *)0x80000200)

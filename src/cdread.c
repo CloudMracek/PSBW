@@ -9,11 +9,13 @@
  * polling are required to defer the next attempt.
  */
 
+#include "cdread.h"
+
 #include <stdint.h>
 #include <stdio.h>
-#include "psbw/cdread.h"
-#include "psbw/cdrom.h"
-#include "psbw/interrupts.h"
+
+#include "cdrom.h"
+#include "interrupts.h"
 
 #define CD_READ_TIMEOUT		180
 #define CD_READ_COOLDOWN	60

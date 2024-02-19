@@ -1,16 +1,13 @@
-
-#undef  SDK_LIBRARY_NAME
-#define SDK_LIBRARY_NAME "psxcd/iso"
+#include "filesystem.h"
 
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
-#include "psbw/filesystem.h"
-#include "psbw/cdrom.h"
-#include "psbw/cdread.h"
-#include "psbw/vsync.h"
+#include "cdrom.h"
+#include "cdread.h"
+#include "vsync.h"
 
 #define CD_READ_ATTEMPTS	3
 #define DEFAULT_PATH_SEP	'\\'

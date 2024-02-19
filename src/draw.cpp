@@ -1,17 +1,19 @@
+#include "draw.h"
+
+#include <stdio.h>
+
 #include <ps1/gpucmd.h>
 #include <ps1/registers.h>
 #include <ps1/system.h>
-#include <stdio.h>
-#include "psbw/draw.h"
+
 #include "psbw/Sprite.h"
 #include "psbw/GameObject.h"
 #include "psbw/Texture.h"
-#include "psbw/settings.h"
-#include "psbw/font.h"
+#include "psbw/Font.h"
 
 extern "C"
 {
-#include "psbw/vsync.h"
+#include "vsync.h"
 }
 // FIX: slower but fixes uploading textures whose size is not a multiple of 16 words
 #define DMA_MAX_CHUNK_SIZE 1

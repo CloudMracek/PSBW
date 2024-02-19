@@ -1,5 +1,5 @@
 #pragma once
-#include "psbw/cdrom.h"
+#include "cdrom.h"
 
 /// Structure of a double-endian unsigned short word
 typedef struct __attribute__((__packed__)) ISO_USHORT_PAIR

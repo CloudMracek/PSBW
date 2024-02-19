@@ -1,6 +1,8 @@
 #include "psbw/GameObject.h"
+
 #include <stdint.h>
 #include <stdlib.h>
+
 
 GameObject::GameObject(int x, int y, int z) {
     GameObject::position.x = x;

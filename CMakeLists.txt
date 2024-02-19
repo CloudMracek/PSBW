@@ -68,24 +68,28 @@ target_include_directories(
 
 # Create the final executable of the engine and link common and game into it
 add_executable(${PROJECT_NAME} 
+
+	#Internal
 	src/main.cpp 
-	src/sio.cpp 
+	src/interrupts.c
 	src/draw.cpp 
-	src/Scene.cpp
-	src/GameObject.cpp 
-	src/Sprite.cpp 
-	src/Text.cpp
-	src/manager.cpp 
-	src/Controller.cpp 
-	src/Sound.cpp 
+	src/vsync.c 
 	src/cdrom.c 
 	src/cdread.c 
-	src/cdmisc.c 
+	src/cdmisc.c
 	src/filesystem.c  
-	src/vsync.c 
-	src/interrupts.c
-	src/fudgebundle.cpp
-	src/font.cpp
+	 
+	#API
+	src/psbw/Sio.cpp 
+	src/psbw/Scene.cpp
+	src/psbw/GameObject.cpp 
+	src/psbw/Sprite.cpp 
+	src/psbw/Text.cpp
+	src/psbw/manager.cpp 
+	src/psbw/Controller.cpp 
+	src/psbw/Sound.cpp 
+	src/psbw/Fudgebundle.cpp
+	src/psbw/font.cpp
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE ${GAME_NAME} common)
 target_include_directories(${PROJECT_NAME} PUBLIC inc)
@@ -166,9 +170,6 @@ function(psn00bsdk_add_cd_image name image_name config_file)
 	)
 endfunction()
 
-
-
-
 if (NOT CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
 	include(ExternalProject)
     ExternalProject_Add(
@@ -196,6 +197,8 @@ ELSE()
     )
 ENDIF()
 
+include(${PROJECT_SOURCE_DIR}/cmake/defines.cmake)
+read_yaml_and_set_defines(GameSettings.yaml)
 
 convertImage(assets/textures/pslib.png 16 ${GAME_NAME}/tex_pslib.dat)
 addBinaryFile(${GAME_NAME} textureData "${PROJECT_BINARY_DIR}/${GAME_NAME}/tex_pslib.dat")

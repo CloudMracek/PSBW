@@ -3,11 +3,13 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+
 #include <ps1/system.h>
 #include <ps1/registers.h>
 #include <ps1/gpucmd.h>
 
-#include "psbw/draw.h"
+#include "draw.h"
+
 #include "psbw/Sound.h"
 
 #define PAGE_WIDTH 64

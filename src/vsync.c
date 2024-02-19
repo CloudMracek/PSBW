@@ -1,8 +1,11 @@
+#include "vsync.h"
+
 #include <stdint.h>
-#include "psbw/vsync.h"
+
 #include <ps1/registers.h>
 #include <ps1/system.h>
-#include "psbw/interrupts.h"
+
+#include "interrupts.h"
 
 #define VSYNC_TIMEOUT	0x100000
 
