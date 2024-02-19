@@ -27,6 +27,7 @@ void main() {
 	game_setup();
 
 	for(;;) {
+		ctrl_update();
 		game_loop();
 		draw_update();
 	}

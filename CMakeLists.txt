@@ -12,7 +12,7 @@ find_package(Python3 REQUIRED COMPONENTS Interpreter)
 
 set(GAME_NAME game)
 
-file(GLOB audio_files "${PROJECT_SOURCE_DIR}/assets/music/*.wav")
+file(GLOB audio_files "${PROJECT_SOURCE_DIR}/assets/music/*.mp3")
 
 set(audio_tracks "")
 foreach(audio_file IN LISTS audio_files)

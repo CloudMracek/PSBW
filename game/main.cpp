@@ -27,12 +27,18 @@ extern "C"
 #include "pieces.h"
 #include "psbw/draw.h"
 
-Scene *scene1;
+Scene *scene1, *mainMenu;
 
 GameObject *fieldBackground, *fieldBorder;
 Sprite *spriteFbg, *spriteFborder;
 
+Sprite *levelSelectBgSprite;
+Sprite *startButtonBgSprite;
+
 Texture *blue, *green, *orange, *purple, *red, *turqoise, *yellow, *font;
+Text *gameOverText;
+
+Sound *gameOverSound, *placeSound;
 
 Controller *controller1;
 
@@ -41,10 +47,11 @@ FDG_HASH_ENTRY *entry;
 CdlFILE file;
 
 bool gameOver = false;
+bool mainMenuButton = false;
 
 char *score;
-char *about;
-char *gameOverBuf;
+char *level;
+char *levelSelect;
 
 #define FIELD_X 110
 #define FIELD_Y 20
@@ -56,18 +63,20 @@ char *gameOverBuf;
 #define CELL_SIZE 10
 
 Sprite *renderArray[FIELD_ROWS][FIELD_COLS];
-BlockColor gameArray[FIELD_ROWS + 4][FIELD_COLS];
+Sprite *previewRenderArray[4][4];
 
+BlockColor gameArray[FIELD_ROWS + 4][FIELD_COLS];
 
 int8_t blockX = 3;
 int8_t blockY = 0;
-uint8_t blockType = randint(0, 6);
-uint8_t fallTimer = 0;
-uint8_t fallDelay = 25;
+int8_t fallTimer = 0;
+uint8_t fallDelay;
 
-uint8_t currentDelay = 25;
-
+uint8_t currentLevel = 0;
+uint8_t currentDelay;
 uint8_t currentRotation = 0;
+
+int8_t blockType = 0, nextBlockType = 0;
 
 uint8_t buttonLeftTimeout, buttonRightTimeout = 0;
 uint8_t buttonLeftTimer, buttonRightTimer = 0;
@@ -76,6 +85,47 @@ bool rotatePrevious = false;
 bool buttonLeftFast, buttonRightFast = false;
 
 unsigned int currentScore = 0;
+uint8_t linesCleared = 0;
+
+uint8_t fallDelays[2][21] = {
+    // For 50 FPS
+    {45, 41, 38, 35, 32, 29, 24, 19, 15, 9, 8, 7, 6, 5, 5, 4, 4, 3, 3, 2, 2},
+    // For 60 FPS
+    {54, 49, 45, 41, 37, 33, 28, 22, 17, 11, 10, 9, 8, 7, 6, 6, 5, 5, 4, 4, 3}};
+
+uint32_t scoringTable[9][4] = {
+    // Points for 1 line, 2 lines, 3 lines, 4 lines
+    {100, 400, 900, 2000},   // Level 0
+    {100, 400, 900, 2000},   // Level 1
+    {200, 800, 1800, 4000},  // Level 2
+    {200, 800, 1800, 4000},  // Level 3
+    {300, 1200, 2700, 6000}, // Level 4
+    {300, 1200, 2700, 6000}, // Level 5
+    {400, 1600, 3600, 8000}, // Level 6
+    {400, 1600, 3600, 8000}, // Level 7
+    {500, 2000, 4500, 10000} // Level 8+
+};
+
+bool inMainMenu = true;
+
+void start_game()
+{
+    currentDelay = fallDelays[draw_get_graphics_mode()][currentLevel];
+
+    update_random_seed();
+    blockType = randint(0, 6);
+    nextBlockType = randint(0, 6);
+    currentScore = 0;
+
+    sound_play_cdda(itob(randint(2, 6)), 1);
+    inMainMenu = false;
+    gameOver = false;
+    gameOverText->text = "";
+    sprintf(score, "SCORE: 0");
+    sprintf(level, "LEVEL: %d", currentLevel);
+
+    psbw_load_scene(scene1);
+}
 
 void game_setup()
 {
@@ -103,6 +153,11 @@ void game_setup()
     yellow = fdg->fudgebundle_get_texture(fdg_hash("yellow"));
 
     font = fdg->fudgebundle_get_texture(fdg_hash("font"));
+
+    scene1->backgroundImage = fdg->fudgebundle_get_background(fdg_hash("gamebg"));
+
+    gameOverSound = fdg->fudgebundle_get_sound(fdg_hash("gameover"));
+    placeSound = fdg->fudgebundle_get_sound(fdg_hash("place"));
 
     setFont(font);
 
@@ -139,6 +194,21 @@ void game_setup()
         }
     }
 
+    for (int i = 0; i < 4; i++)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            GameObject *object = new GameObject(242 + (j * CELL_SIZE), 35 + (i * CELL_SIZE), 0);
+            Sprite *sprite = new Sprite(SPRITE_TYPE_TEXTURED);
+            sprite->tex = nullptr;
+            sprite->Width = blue->width;
+            sprite->Height = blue->height;
+            object->addComponent(sprite);
+            previewRenderArray[i][j] = sprite;
+            scene1->addGameObject(object);
+        }
+    }
+
     for (int i = 0; i < FIELD_ROWS + 4; i++)
     {
         for (int j = 0; j < FIELD_COLS; j++)
@@ -147,33 +217,121 @@ void game_setup()
         }
     }
 
-    about = (char*)malloc(50);
-    score = (char*)malloc(50);
-    gameOverBuf = (char*) malloc(50);
+    score = (char *)malloc(50);
+    level = (char *)malloc(50);
 
-    GameObject *objAbout = new GameObject(20,20,0);
-    Text *text = new Text();
-    text->text = about;
-    objAbout->addComponent(text);
-
-    GameObject *objScore = new GameObject(230,20,0);
+    GameObject *objScore = new GameObject(227, 103, 0);
     Text *scoreText = new Text();
     scoreText->text = score;
     objScore->addComponent(scoreText);
 
-    sprintf(about, "PSXRIS\nMADE BY\nBANDWIDTH");
-    sprintf(score, "SCORE: 0");
-    sprintf(gameOverBuf, "GAME\nOVER!");
+    GameObject *objLevel = new GameObject(227, 114, 0);
+    Text *levelText = new Text();
+    levelText->text = level;
+    objLevel->addComponent(levelText);
 
-    scene1->addGameObject(objAbout);
+    GameObject *objNext = new GameObject(242, 22, 0);
+    Text *nextText = new Text();
+    nextText->text = "NEXT:";
+    objNext->addComponent(nextText);
+
+    sprintf(score, "SCORE: 0");
+    sprintf(level, "LEVEL: %d", currentLevel);
+
     scene1->addGameObject(objScore);
+    scene1->addGameObject(objLevel);
+    scene1->addGameObject(objNext);
+
+    GameObject *gameOverObj = new GameObject(150, 30, 0);
+    gameOverText = new Text();
+
+    gameOverText->text = "";
+    gameOverObj->addComponent(gameOverText);
+    scene1->addGameObject(gameOverObj);
 
     sound_play_cdda(2, 1);
-    psbw_load_scene(scene1);
+
+    mainMenu = new Scene();
+    mainMenu->backgroundImage = fdg->fudgebundle_get_background(fdg_hash("menubg"));
+
+    GameObject *levelSelectBg = new GameObject(115, 102, 0);
+    levelSelectBgSprite = new Sprite(SPRITE_TYPE_FLAT_COLOR);
+    levelSelectBgSprite->Width = 90;
+    levelSelectBgSprite->Height = 20;
+    levelSelectBgSprite->Color = {255, 255, 255};
+    levelSelectBg->addComponent(levelSelectBgSprite);
+
+    GameObject *levelSelectFg = new GameObject(118, 105, 0);
+    Sprite *levelSelectFgSprite = new Sprite(SPRITE_TYPE_FLAT_COLOR);
+    levelSelectFgSprite->Width = 84;
+    levelSelectFgSprite->Height = 14;
+    levelSelectFgSprite->Color = {0, 0, 0};
+    levelSelectFg->addComponent(levelSelectFgSprite);
+
+    GameObject *startButtonBg = new GameObject(115, 135, 0);
+    startButtonBgSprite = new Sprite(SPRITE_TYPE_FLAT_COLOR);
+    startButtonBgSprite->Width = 90;
+    startButtonBgSprite->Height = 20;
+    startButtonBgSprite->Color = {255, 255, 255};
+    startButtonBg->addComponent(startButtonBgSprite);
+
+    GameObject *startButtonFg = new GameObject(118, 138, 0);
+    Sprite *startButtonFgSprite = new Sprite(SPRITE_TYPE_FLAT_COLOR);
+    startButtonFgSprite->Width = 84;
+    startButtonFgSprite->Height = 14;
+    startButtonFgSprite->Color = {0, 0, 0};
+    startButtonFg->addComponent(startButtonFgSprite);
+
+    levelSelect = (char *)malloc(50);
+    GameObject *levelSelectText = new GameObject(155, 108, 0);
+    Text *levelSelectTextCmp = new Text();
+    levelSelectTextCmp->text = levelSelect;
+    sprintf(levelSelect, "0");
+    levelSelectText->addComponent(levelSelectTextCmp);
+
+    GameObject *startButtonText = new GameObject(146, 141, 0);
+    Text *startButtonTextCmp = new Text();
+    startButtonTextCmp->text = "START";
+    startButtonText->addComponent(startButtonTextCmp);
+
+    GameObject *levelSelectLeft = new GameObject(121, 108, 0);
+    Text *levelSelectLeftText = new Text();
+    levelSelectLeftText->text = "<";
+    levelSelectLeft->addComponent(levelSelectLeftText);
+
+    GameObject *levelSelectRight = new GameObject(195, 108, 0);
+    Text *levelSelectRightText = new Text();
+    levelSelectRightText->text = ">";
+    levelSelectRight->addComponent(levelSelectRightText);
+
+    GameObject *levelSelectLabel = new GameObject(116, 92, 0);
+    Text *levelSelectLabelText = new Text();
+    levelSelectLabelText->text = "LEVEL:";
+    levelSelectLabel->addComponent(levelSelectLabelText);
+
+    mainMenu->addGameObject(levelSelectBg);
+    mainMenu->addGameObject(levelSelectFg);
+    mainMenu->addGameObject(startButtonBg);
+    mainMenu->addGameObject(startButtonFg);
+    mainMenu->addGameObject(levelSelectText);
+    mainMenu->addGameObject(startButtonText);
+    mainMenu->addGameObject(levelSelectLeft);
+    mainMenu->addGameObject(levelSelectRight);
+    mainMenu->addGameObject(levelSelectLabel);
+
+    if (!inMainMenu)
+    {
+        psbw_load_scene(scene1);
+    }
+    else
+    {
+        psbw_load_scene(mainMenu);
+    }
 }
 
-BlockColor (*get_block_arrray(uint8_t blockType, uint8_t rotation))[4][4] {
-    BlockColor (*piece)[4][4]; // Define a pointer to a 4x4  renderArray of BlockColor
+BlockColor (*get_block_arrray(uint8_t blockType, uint8_t rotation))[4][4]
+{
+    BlockColor(*piece)[4][4]; // Define a pointer to a 4x4  renderArray of BlockColor
 
     switch (blockType)
     {
@@ -214,7 +372,7 @@ BlockColor (*get_block_arrray(uint8_t blockType, uint8_t rotation))[4][4] {
 
 void render_piece(int8_t x, int8_t y, uint8_t blockType, uint8_t rotation)
 {
-    BlockColor (*piece)[4][4] = get_block_arrray(blockType, rotation);
+    BlockColor(*piece)[4][4] = get_block_arrray(blockType, rotation);
     for (int row = 0; row < 4; row++)
     {
         for (int col = 0; col < 4; col++)
@@ -329,9 +487,70 @@ void render_game_array()
     }
 }
 
+void render_preview_piece(uint8_t blockType, uint8_t rotation)
+{
+    uint8_t x = 0, y = 0;
+    BlockColor(*piece)[4][4] = get_block_arrray(blockType, rotation);
+    for (int row = 0; row < 4; row++)
+    {
+        for (int col = 0; col < 4; col++)
+        {
+
+            int newY = y + row;
+
+            Texture *color;
+            // swap
+            BlockColor blockColor = (*piece)[row][col];
+
+            switch (blockColor)
+            {
+            case Empty:
+                color = nullptr;
+                break;
+            case Blue:
+                color = blue;
+                break;
+
+            case Green:
+                color = green;
+                break;
+
+            case Orange:
+                color = orange;
+                break;
+
+            case Purple:
+                color = purple;
+                break;
+
+            case Red:
+                color = red;
+                break;
+
+            case Turqoise:
+                color = turqoise;
+                break;
+
+            case Yellow:
+                color = yellow;
+                break;
+
+            default:
+                // Handle any other cases or errors
+                break;
+            }
+
+            if (newY > 19 || col + x > 9 || col + x < 0 || blockColor == Empty)
+                continue;
+
+            previewRenderArray[newY][col + x]->tex = color;
+        }
+    }
+}
+
 void project_piece_into_game_array(int8_t x, int8_t y, uint8_t blockType, uint8_t rotation)
 {
-    BlockColor (*piece)[4][4] = get_block_arrray(blockType, rotation);
+    BlockColor(*piece)[4][4] = get_block_arrray(blockType, rotation);
 
     for (int row = 0; row < 4; row++)
     {
@@ -340,10 +559,22 @@ void project_piece_into_game_array(int8_t x, int8_t y, uint8_t blockType, uint8_
             BlockColor blockColor = (*piece)[row][col];
             if (blockColor == Empty)
                 continue;
-            if((row+y) < 4) { 
+            if ((row + y) < 4)
+            {
                 gameOver = true;
             }
             gameArray[row + y][col + x] = blockColor;
+        }
+    }
+}
+
+void clear_game_array()
+{
+    for (int i = 0; i < FIELD_ROWS+4; i++)
+    {
+        for (int j = 0; j < FIELD_COLS; j++)
+        {
+            gameArray[i][j] = Empty;
         }
     }
 }
@@ -357,11 +588,19 @@ void clear_render_array()
             renderArray[i][j]->tex = nullptr;
         }
     }
+
+    for (int i = 0; i < 4; i++)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            previewRenderArray[i][j]->tex = nullptr;
+        }
+    }
 }
 
 bool check_fall_collision(int8_t x, int8_t y, uint8_t blockType, uint8_t rotation)
 {
-    BlockColor (*piece)[4][4] = get_block_arrray(blockType, rotation);
+    BlockColor(*piece)[4][4] = get_block_arrray(blockType, rotation);
 
     for (int row = 0; row < 4; row++)
     {
@@ -384,7 +623,7 @@ bool check_fall_collision(int8_t x, int8_t y, uint8_t blockType, uint8_t rotatio
 
 bool check_rotation_position(int8_t x, int8_t y, uint8_t blockType, uint8_t rotation)
 {
-    BlockColor (*piece)[4][4] = get_block_arrray(blockType, rotation);
+    BlockColor(*piece)[4][4] = get_block_arrray(blockType, rotation);
 
     bool colliding = false;
     for (int row = 0; row < 4; row++)
@@ -404,22 +643,28 @@ bool check_rotation_position(int8_t x, int8_t y, uint8_t blockType, uint8_t rota
         }
     }
 
-    if(colliding && x < 5) {
-        if(!check_fall_collision(x+1, y, blockType, rotation)) {
+    if (colliding && x < 5)
+    {
+        if (!check_fall_collision(x + 1, y, blockType, rotation))
+        {
             blockX++;
             return false;
         }
-        else if(!check_fall_collision(x+2, y, blockType, rotation)) {
+        else if (!check_fall_collision(x + 2, y, blockType, rotation))
+        {
             blockX += 2;
             return false;
         }
     }
-    else if(colliding && x >= 5) {
-        if(!check_fall_collision(x-1, y, blockType, rotation)) {
+    else if (colliding && x >= 5)
+    {
+        if (!check_fall_collision(x - 1, y, blockType, rotation))
+        {
             blockX--;
             return false;
         }
-        else if(!check_fall_collision(x-2, y, blockType, rotation)) {
+        else if (!check_fall_collision(x - 2, y, blockType, rotation))
+        {
             blockX -= 2;
             return false;
         }
@@ -462,8 +707,6 @@ void check_full_lines()
         if (full_row)
         {
             foundFull++;
-            if (currentDelay > 5)
-                currentDelay = currentDelay - 2;
             // Clear the full row
             for (j = 0; j < FIELD_COLS; j++)
             {
@@ -485,29 +728,115 @@ void check_full_lines()
         }
     }
 
-    if(foundFull != 0) {
-        int multiplier = 1;
-        for(int i = 0; i < foundFull; i++) {
-            multiplier*=2;
+    if (foundFull > 0)
+    {
+        if (currentLevel >= 8)
+        {   
+            unsigned int scoreToAdd = currentScore + scoringTable[8][foundFull - 1];
+            currentScore += scoreToAdd;
+            sprintf(score, "SCORE: %u", currentScore);
         }
-        currentScore+=(100*multiplier);
-        sprintf(score, "SCORE: %d", currentScore);
+        else
+        {
+            unsigned int scoreToAdd = scoringTable[currentLevel][foundFull - 1];
+            currentScore += scoreToAdd;
+            sprintf(score, "SCORE: %u", currentScore);
+        }
+    }
+
+    linesCleared += foundFull;
+    if (linesCleared >= 10)
+    {
+        linesCleared = 0;
+        if (currentLevel < 20)
+        {
+            currentLevel++;
+            sprintf(level, "LEVEL: %u", currentLevel);
+            currentDelay = fallDelays[draw_get_graphics_mode()][currentLevel];
+        }
     }
 }
 
 void game_loop()
 {
 
-    if(gameOver) {
+    if (inMainMenu)
+    {
+
+        if (mainMenuButton)
+        {
+            levelSelectBgSprite->Color = {255, 255, 255};
+            startButtonBgSprite->Color = {255, 0, 0};
+        }
+        else
+        {
+            levelSelectBgSprite->Color = {255, 0, 0};
+            startButtonBgSprite->Color = {255, 255, 255};
+        }
+
+        if (controller1->GetButtonDown(Up) || controller1->GetButtonDown(Down))
+        {
+            mainMenuButton = !mainMenuButton;
+        }
+
+        if (!mainMenuButton)
+        {
+            if (controller1->GetButtonDown(Right))
+            {
+                if (currentLevel < 20)
+                {
+                    currentLevel++;
+                    sprintf(levelSelect, "%d", currentLevel);
+                }
+            }
+            else if (controller1->GetButtonDown(Left))
+            {
+                if (currentLevel > 0)
+                {
+                    currentLevel--;
+                    sprintf(levelSelect, "%d", currentLevel);
+                }
+            }
+        }
+        if (mainMenuButton)
+        {
+            if (controller1->GetButtonDown(X))
+            {
+                start_game();
+            }
+        }
+
+        return;
+    }
+
+    if (gameOver)
+    {
+        sound_stop_cdda();
+        for (int i = 0; i < 3; i++)
+        {
+            for (int j = 0; j < 30; j++)
+                draw_update();
+            clear_render_array();
+            for (int j = 0; j < 30; j++)
+                draw_update();
+            render_game_array();
+        }
         clear_render_array();
-        GameObject *gameOverObj = new GameObject(150, 30, 0);
-        Text *text = new Text();
-        
-        text->text = gameOverBuf;
-        gameOverObj->addComponent(text);
-        scene1->addGameObject(gameOverObj);
+        clear_game_array();
+        gameOverSound->play();
+        gameOverText->text = "GAME\nOVER\nPRESS\nX\nTO\nRETURN";
         draw_update();
-        while(1);
+        while (1)
+        {
+            ctrl_update();
+            if (controller1->GetButton(X))
+            {
+                inMainMenu = true;
+                sound_play_cdda(2,1);
+                psbw_load_scene(mainMenu);
+                return;
+            }
+        }
     }
 
     if (controller1->GetButton(Left))
@@ -558,29 +887,19 @@ void game_loop()
         buttonRightFast = false;
     }
 
-    if (controller1->GetButton(Up))
-    {
-        if (!rotatePrevious)
-        {
-            rotatePrevious = true;
-            if (!check_rotation_position(blockX, blockY, blockType, (currentRotation + 1) % 4))
-            {
-                currentRotation = (currentRotation + 1) % 4;
-            }
-        }
-    }
-    else
-    {
-        rotatePrevious = false;
-    }
-
+    fallDelay = currentDelay;
     if (controller1->GetButton(Down))
     {
         fallDelay = 5;
     }
-    else
+
+    if (controller1->GetButtonDown(Up))
     {
-        fallDelay = currentDelay;
+        if (!check_rotation_position(blockX, blockY, blockType, (currentRotation + 1) % 4))
+        {
+            currentRotation = (currentRotation + 1) % 4;
+            fallTimer -= 10;
+        }
     }
 
     fallTimer++;
@@ -589,11 +908,13 @@ void game_loop()
         fallTimer = 0;
         if (check_fall_collision(blockX, blockY + 1, blockType, currentRotation))
         {
+            placeSound->play();
             project_piece_into_game_array(blockX, blockY, blockType, currentRotation);
             check_full_lines();
             blockY = 0;
             blockX = 3;
-            blockType = randint(0, 6);
+            blockType = nextBlockType;
+            nextBlockType = randint(0, 6);
         }
         else
         {
@@ -603,5 +924,6 @@ void game_loop()
 
     clear_render_array();
     render_game_array();
+    render_preview_piece(nextBlockType, 0);
     render_piece(blockX, blockY, blockType, currentRotation);
 }

@@ -13,6 +13,11 @@
 #define PAGE_WIDTH 64
 #define PAGE_HEIGHT 256
 
+typedef struct [[gnu::packed]] FDG_BG_HEADER
+{
+    uint16_t x,y,width,height;
+} FDG_BG_HEADER;
+
 uint8_t _current_texpage = 10;
 
 typedef struct [[gnu::packed]] FDG_TEXTURE_DESCRIPTOR
@@ -71,6 +76,8 @@ int Fudgebundle::_fudgebundle_load(uint8_t* data) {
     int pageCount = (_fdg_index->numAtlases256 * 4) + (_fdg_index->numAtlases192 * 3) +
     + (_fdg_index->numAtlases128 * 2) + _fdg_index->numAtlases64;
 
+    pageCount = 6;
+
 
     // This is for fudgebundle stacking which is sadly broken now
     _entry_texpage = _current_texpage;
@@ -106,7 +113,6 @@ FDG_HASH_ENTRY *Fudgebundle::_fudgebundle_get_entry(uint32_t hash) {
     // be optimized by rewriting it as "hash & (numBuckets - 1)", which is an
     // order of magnitude faster on the PS1.
     FDG_HASH_ENTRY *entry = &_hash_table[hash & (_fdg_index->numBuckets - 1)];
-
     if (entry->hash == hash)
         return entry;
 
@@ -139,7 +145,6 @@ Texture *Fudgebundle::fudgebundle_get_texture(uint32_t hash) {
         widthDivider = 1;
     }
 
-
     tex->width = frameDesc->width;
     tex->height = frameDesc->height;
 
@@ -147,7 +152,7 @@ Texture *Fudgebundle::fudgebundle_get_texture(uint32_t hash) {
 
     if(frameDesc->imagePageIndex <= 6) {
         globalX = (frameDesc->imagePageIndex+10)*64 + tex->u;
-        globalY = tex->v;    widthDivider = 4;
+        globalY = tex->v;
     }
     else {
         globalX = (frameDesc->imagePageIndex-7)*64;
@@ -192,13 +197,46 @@ Texture *Fudgebundle::fudgebundle_get_texture(uint32_t hash) {
 
     return tex;
 }
-FDG_SOUND_DESCRIPTOR *soundDesc;
-FDG_HASH_ENTRY *entry2;
+
 Sound *Fudgebundle::fudgebundle_get_sound(uint32_t hash) {
-    entry2 = _fudgebundle_get_entry(hash);
-    soundDesc = (FDG_SOUND_DESCRIPTOR*) (_ram_data+entry2->offset);
+    FDG_SOUND_DESCRIPTOR *soundDesc;
+    FDG_HASH_ENTRY *entry;
+    entry = _fudgebundle_get_entry(hash);
+    soundDesc = (FDG_SOUND_DESCRIPTOR*) (_ram_data+entry->offset);
     Sound* snd = new Sound();
     snd->soundAddr = soundDesc->leftOffset;
     snd->sampleRate = soundDesc->sampleRate;
     return snd;
+}
+
+Vector2D *Fudgebundle::fudgebundle_get_background(uint32_t hash) {
+    FDG_HASH_ENTRY *entry;
+    entry = _fudgebundle_get_entry(hash);
+
+    FDG_BG_HEADER *header = (FDG_BG_HEADER*)(_ram_data+entry->offset);
+
+    // TODO: WASTEFUL!!!
+    if(_current_texpage+5 > 15 && _current_texpage <= 15) {
+        _current_texpage += 5;
+    }
+
+    unsigned int globalX, globalY;
+    if(_current_texpage <= 15) {
+        globalX = (_current_texpage)*64;
+        globalY = 0;
+    }
+    else {
+        globalX = (_current_texpage-16)*64;
+        globalY = 256;
+    }
+
+    vram_send_data(_ram_data+entry->offset+sizeof(FDG_BG_HEADER), globalX, globalY, header->width, header->height);
+
+    _current_texpage+=5;
+    Vector2D *out = (Vector2D*)malloc(sizeof(Vector2D));
+
+    out->x = globalX;
+    out->y = globalY;
+
+    return out;
 }

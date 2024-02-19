@@ -34,6 +34,8 @@ enum ControllerButton {
 void ctrl_init();
 
 
+void ctrl_update();
+
 /**
  * \class Controller
  * \brief This class allows you to access input data from a Controller of your choice
@@ -43,13 +45,15 @@ void ctrl_init();
 class Controller {
     public:
         ControllerPort port;
-        
         // Initialize controller with selected port
         Controller(ControllerPort controllerPort);
 
-/**
- * \brief Returns 1 if the selected button is pressed. 0 if otherwise
- */        
-int8_t GetButton(ControllerButton button);
+        /**
+         * \brief Returns 1 if the selected button is pressed. 0 if otherwise
+         */        
+        bool GetButton(ControllerButton button);
 
+        bool GetButtonDown(ControllerButton button);
+
+        bool IsConnected();
 };

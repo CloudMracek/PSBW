@@ -2,6 +2,8 @@
 #include "ps1/registers.h"
 #include "ps1/system.h"
 
+#include <string.h>
+
 void ctrl_init(void) {
 	// Reset the serial interface, initialize it with the settings used by
 	// controllers and memory cards (250000bps, 8 data bits) and configure it to
@@ -124,31 +126,80 @@ static int ctrl_exchange_packet(
 	return respLength;
 }
 
-Controller::Controller(ControllerPort controllerPort) {
-    port = controllerPort;
-}
 
-int8_t Controller::GetButton(ControllerButton button) {
 
-    uint8_t request[4], response[8];	
+
+uint8_t ctrlState[2][8];
+
+uint8_t ctrlPrevState[2][8];
+
+bool ctrlConnected[2];
+
+void ctrl_update() {
+    uint8_t request[4], response[8];
 
 	request[0] = CMD_POLL; // Command
 	request[1] = 0x00;     // Multitap address
 	request[2] = 0x00;     // Rumble motor control 1
 	request[3] = 0x00;     // Rumble motor control 2
 
-    ctrl_port_select(port);
+	memcpy(&ctrlPrevState[CONTROLLER_PORT_1], &ctrlState[CONTROLLER_PORT_1], 8);
+    ctrl_port_select(CONTROLLER_PORT_1);
     int respLength = ctrl_exchange_packet(
-		request, response, sizeof(request), sizeof(response)
+		request, ctrlState[CONTROLLER_PORT_1], sizeof(request), sizeof(response)
 	);
 
-    if(respLength < 4) {
-        // No controller is connected
-        return 0;
+	if(respLength < 4) {
+		ctrlConnected[CONTROLLER_PORT_1] = false;
+	}
+	else {
+		ctrlConnected[CONTROLLER_PORT_1] = true;
+	}
+
+	memcpy(&ctrlPrevState[CONTROLLER_PORT_2], &ctrlState[CONTROLLER_PORT_2], 8);
+    ctrl_port_select(CONTROLLER_PORT_2);
+    respLength = ctrl_exchange_packet(
+		request, ctrlState[CONTROLLER_PORT_2], sizeof(request), sizeof(response)
+	);
+
+	if(respLength < 4) {
+		ctrlConnected[CONTROLLER_PORT_2] = false;
+	}
+	else {
+		ctrlConnected[CONTROLLER_PORT_2] = true;
+	}
+}
+
+Controller::Controller(ControllerPort controllerPort) {
+    port = controllerPort;
+}
+
+bool Controller::IsConnected() {
+	return ctrlConnected[port];
+}
+
+bool Controller::GetButton(ControllerButton button) {
+    if(!IsConnected()) {
+        return false;
     }
     // bytes 2 and 3 contain a bitfield of all the button states (inverted)
-    uint16_t buttons = (response[2] | (response[3] << 8)) ^ 0xffff;
+    uint16_t buttons = (ctrlState[port][2] | (ctrlState[port][3] << 8)) ^ 0xffff;
     // return button state
-    return (buttons & button) ? 1 : 0;
+    return (buttons & button) ? true : false;
+}
 
+bool Controller::GetButtonDown(ControllerButton button) {
+    if(!IsConnected()) {
+        return false;
+    }
+    // bytes 2 and 3 contain a bitfield of all the button states (inverted)
+    uint16_t buttons = (ctrlState[port][2] | (ctrlState[port][3] << 8)) ^ 0xffff;
+	uint16_t oldButtons = (ctrlPrevState[port][2] | (ctrlPrevState[port][3] << 8)) ^ 0xffff;
+    // return button state
+    if(buttons & button && !(oldButtons & button)) {
+		return true;
+	}
+	else {
+		return false;
+	}
 }

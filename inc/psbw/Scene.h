@@ -15,6 +15,7 @@ typedef struct GAMEOBJECT_ENTRY {
 class Scene {
     public:
         char* name;
+        Vector2D *backgroundImage = nullptr;
         Scene();
         void addGameObject(GameObject *object);
         GAMEOBJECT_ENTRY _linked_list;
