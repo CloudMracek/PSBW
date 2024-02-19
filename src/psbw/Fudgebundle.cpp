@@ -92,8 +92,8 @@ int Fudgebundle::_fudgebundle_load(uint8_t* data) {
 
     // Calculate pointer to VRAM data in RAM and the number of pages;
     uint8_t* vram_data = data+_fdg_index->indexLength;
-    _pageCount = (_fdg_index->numAtlases256 * 4) + (_fdg_index->numAtlases192 * 3) +
-    + (_fdg_index->numAtlases128 * 2) + _fdg_index->numAtlases64;
+    _pageCount = (_fdg_index->numAtlases256) + (_fdg_index->numAtlases192) +
+    + (_fdg_index->numAtlases128) + _fdg_index->numAtlases64;
 
     // This is for fudgebundle stacking which is sadly broken now
     _entry_texpage = _current_texpage;
@@ -233,8 +233,9 @@ Vector2D *Fudgebundle::fudgebundle_get_background(uint32_t hash) {
 
     // TODO: WASTEFUL!!!
     if(_current_texpage+5 > 15 && _current_texpage <= 15) {
-        _current_texpage += 5;
-        _pageCount += 5;
+        uint8_t pagesToAdd = 16 - _current_texpage;
+        _current_texpage += pagesToAdd;
+        _pageCount += pagesToAdd;
     }
 
     unsigned int globalX, globalY;

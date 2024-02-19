@@ -782,7 +782,7 @@ void Psxris::sceneLoop()
 
         if (controller1->GetButton(X))
         {
-            MainMenu *menu = new MainMenu("\\BUNDLE.FDG");
+            MainMenu *menu = new MainMenu("\\MENU.FDG");
             psbw_load_scene(menu);
             return;
         }

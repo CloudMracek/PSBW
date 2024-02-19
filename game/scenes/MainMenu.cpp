@@ -171,7 +171,7 @@ void MainMenu::sceneLoop()
     {
         if (controller1->GetButtonDown(X))
         {
-            Psxris *psxris = new Psxris("\\BUNDLE.FDG", currentLevel);
+            Psxris *psxris = new Psxris("\\GAME.FDG", currentLevel);
             psbw_load_scene(psxris);
             return;
         }
