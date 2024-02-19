@@ -49,6 +49,7 @@ class Fudgebundle {
         FDG_HASH_ENTRY* _hash_table;
         uint8_t* _ram_data;
 
+        uint8_t _pageCount;
         uint8_t _entry_texpage;
 
         int _fudgebundle_load(uint8_t* data);

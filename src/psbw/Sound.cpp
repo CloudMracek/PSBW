@@ -229,10 +229,10 @@ void Sound::play()
 
 void soundPlayCdda(int track, int loop)
 {
-	CdPlayCdda(track, loop);
+	CdPlayCdda(itob(track), loop);
 }
 
-void soundPlayCdda()
+void soundStopCdda()
 {
 	CdStopCdda();
 }

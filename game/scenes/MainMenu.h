@@ -1,3 +1,5 @@
+#pragma once
+
 #include <psbw/Scene.h>
 
 #include <psbw/GameObject.h>
@@ -29,11 +31,11 @@ class MainMenu : public Scene {
         GameObject *levelSelectFg;
         Sprite *levelSelectFgSprite;
 
-        GameObject *startButtonFg;
-        Sprite *startButtonFgSprite;
-
         GameObject *startButtonBg;
         Sprite *startButtonBgSprite;
+
+        GameObject *startButtonFg;
+        Sprite *startButtonFgSprite;
 
         GameObject *levelSelect;
         Text *levelSelectText;

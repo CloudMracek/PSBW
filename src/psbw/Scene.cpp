@@ -5,7 +5,10 @@
 Scene::Scene(char *sceneName) {
     name = sceneName;
     _linked_list.object = nullptr;
-    _fdg = new Fudgebundle(sceneName);
+}
+
+void Scene::loadData() {
+    _fdg = new Fudgebundle(name);
 }
 
 Scene::~Scene() {

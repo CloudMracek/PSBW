@@ -58,6 +58,7 @@ add_library(
 	${GAME_NAME} OBJECT
 	game/main.cpp
 	game/scenes/MainMenu.cpp
+	game/scenes/Psxris.cpp
 )
 
 target_include_directories(

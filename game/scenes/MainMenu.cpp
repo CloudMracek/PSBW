@@ -4,11 +4,47 @@
 #include <stdio.h>
 
 #include <psbw/Sound.h>
+#include <psbw/Manager.h>
+
+#include "Psxris.h"
 
 MainMenu::MainMenu(char *name) : Scene(name) {}
 
 MainMenu::~MainMenu()
 {
+    free(levelSelectBuf);
+    delete controller1;
+    
+    delete pixelFontTexture;
+    delete pixelFont;
+
+    delete levelSelectBg;
+    delete levelSelectBgSprite;
+
+    delete levelSelectFg;
+    delete levelSelectFgSprite;
+
+    delete startButtonBg;
+    delete startButtonBgSprite;
+
+    delete startButtonFg;
+    delete startButtonFgSprite;
+
+    delete levelSelect;
+    delete levelSelectText;
+
+    delete startButton;
+    delete startButtonText;
+
+    delete levelSelectLeft;
+    delete levelSelectLeftText;
+
+    delete levelSelectRight;
+    delete levelSelectRightText;
+
+    delete levelSelectLabel;
+    delete levelSelectLabelText;
+
     Scene::~Scene();
 }
 
@@ -135,7 +171,9 @@ void MainMenu::sceneLoop()
     {
         if (controller1->GetButtonDown(X))
         {
-            //start_game();
+            Psxris *psxris = new Psxris("\\BUNDLE.FDG", currentLevel);
+            psbw_load_scene(psxris);
+            return;
         }
     }
 }

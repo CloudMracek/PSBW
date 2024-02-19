@@ -15,6 +15,9 @@ typedef struct GAMEOBJECT_ENTRY {
 
 class Scene {
     public:
+        ~Scene();
+        void loadData();
+        
         char* name;
         
         Vector2D *backgroundImage = nullptr;
@@ -31,6 +34,5 @@ class Scene {
 
     protected:
         Scene(char *sceneName);
-        ~Scene();
         Fudgebundle* _fdg;
 };

@@ -1,8 +1,10 @@
+#pragma once
+
 #include "psbw/Component.h"
 #include "psbw/Vector.h"
 #include "psbw/Texture.h"
 #include "psbw/GameObject.h"
-#include "psbw/Font.h";
+#include "psbw/Font.h"
 
 class Text : public Component {
     public:

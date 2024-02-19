@@ -29,6 +29,10 @@ uint8_t _graphicsMode;
 Scene *activeScene;
 void load_scene(Scene *scene)
 {
+	if(activeScene != nullptr) {
+		delete activeScene;
+	}
+	scene->loadData();
 	activeScene = scene;
 	activeScene->sceneSetup();
 }

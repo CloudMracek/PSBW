@@ -68,6 +68,7 @@ Fudgebundle::Fudgebundle(char *filename) {
 Fudgebundle::~Fudgebundle() {
     free(_ram_data);
     free(_fdg_index);
+    _current_texpage -= _pageCount;
 }
 
 int Fudgebundle::_fudgebundle_load(uint8_t* data) {
@@ -91,18 +92,15 @@ int Fudgebundle::_fudgebundle_load(uint8_t* data) {
 
     // Calculate pointer to VRAM data in RAM and the number of pages;
     uint8_t* vram_data = data+_fdg_index->indexLength;
-    int pageCount = (_fdg_index->numAtlases256 * 4) + (_fdg_index->numAtlases192 * 3) +
+    _pageCount = (_fdg_index->numAtlases256 * 4) + (_fdg_index->numAtlases192 * 3) +
     + (_fdg_index->numAtlases128 * 2) + _fdg_index->numAtlases64;
-
-    pageCount = 6;
-
 
     // This is for fudgebundle stacking which is sadly broken now
     _entry_texpage = _current_texpage;
-    _current_texpage = _current_texpage + pageCount;
+    _current_texpage = _current_texpage + _pageCount;
 
     // Upload data to VRAM
-    for(int i = 0; i < pageCount; i++) {
+    for(int i = 0; i < _pageCount; i++) {
         uint8_t* currentPage = vram_data+(i*(64*256*sizeof(short)));
         if(_entry_texpage+i > 15) {
             vram_send_data(currentPage, ((_entry_texpage+i) % 16)*64, 256, PAGE_WIDTH, PAGE_HEIGHT);
@@ -236,6 +234,7 @@ Vector2D *Fudgebundle::fudgebundle_get_background(uint32_t hash) {
     // TODO: WASTEFUL!!!
     if(_current_texpage+5 > 15 && _current_texpage <= 15) {
         _current_texpage += 5;
+        _pageCount += 5;
     }
 
     unsigned int globalX, globalY;
@@ -251,6 +250,7 @@ Vector2D *Fudgebundle::fudgebundle_get_background(uint32_t hash) {
     vram_send_data(_ram_data+entry->offset+sizeof(FDG_BG_HEADER), globalX, globalY, header->width, header->height);
 
     _current_texpage+=5;
+    _pageCount += 5;
     Vector2D *out = (Vector2D*)malloc(sizeof(Vector2D));
 
     out->x = globalX;

@@ -1,3 +1,5 @@
+#pragma once
+
 #include "psbw/Component.h"
 #include "psbw/Vector.h"
 #include "psbw/Texture.h"
