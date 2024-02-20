@@ -867,9 +867,11 @@ void Psxris::sceneLoop()
     }
 
     fallDelay = currentDelay;
-    if (controller1->GetButton(Down))
+    if (controller1->GetButtonDown(Down))
     {
-        fallDelay = 5;
+        while(!checkFallCollision(blockX, blockY + 1, blockType, currentRotation)) {
+            blockY++;
+        }
     }
 
     if (controller1->GetButtonDown(Up))

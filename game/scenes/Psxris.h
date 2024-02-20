@@ -88,7 +88,7 @@ private:
     uint8_t currentLevel = 0;
     uint8_t currentDelay;
     uint8_t currentRotation = 0;
-    uint8_t currentScore = 0;
+    unsigned int currentScore = 0;
 
     uint8_t linesCleared = 0;
 

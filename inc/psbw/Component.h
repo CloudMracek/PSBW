@@ -1,7 +1,8 @@
 #pragma once
 
-class GameObject;
+#include "psbw/Vector.h"
 
+class GameObject;
 
 /**
  * \class Component
@@ -13,5 +14,5 @@ class Component {
 public:
     // Run function of selected component. Managed by engine. DO NOT RUN IN GAME CODE!
     virtual void execute(GameObject* parent) = 0;
-
+    Vector3D relPos = {0,0,0};
 };

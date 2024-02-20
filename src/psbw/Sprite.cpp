@@ -14,7 +14,7 @@ void Sprite::execute(GameObject* parent) {
     if(Type == SPRITE_TYPE_FLAT_COLOR) {
         ptr = dma_get_chain_pointer(3);
         ptr[0] = gp0_rgb(Color.x, Color.y, Color.z) | gp0_rectangle(false, false, false);
-	    ptr[1] = gp0_xy(parent->position.x, parent->position.y);
+	    ptr[1] = gp0_xy(parent->position.x+Component::relPos.x, parent->position.y+Component::relPos.y);
 	    ptr[2] = gp0_xy(Width, Height);
     }
     else if(Type == SPRITE_TYPE_TEXTURED && tex != nullptr) {

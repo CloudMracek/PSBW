@@ -77,6 +77,7 @@ void load_scene(Scene *scene)
 {
 	upload_debug_font();
 	draw_update(false);
+	draw_update(false);
 	if (activeScene != nullptr)
 	{
 		delete activeScene;

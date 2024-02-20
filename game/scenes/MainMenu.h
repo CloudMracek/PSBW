@@ -25,32 +25,20 @@ class MainMenu : public Scene {
         Texture *pixelFontTexture;
         Font *pixelFont;
 
-        GameObject *levelSelectBg;
-        Sprite *levelSelectBgSprite;
-
-        GameObject *levelSelectFg;
-        Sprite *levelSelectFgSprite;
-
-        GameObject *startButtonBg;
-        Sprite *startButtonBgSprite;
-
-        GameObject *startButtonFg;
-        Sprite *startButtonFgSprite;
 
         GameObject *levelSelect;
         Text *levelSelectText;
+        Sprite *levelSelectBgSprite;
+        Sprite *levelSelectFgSprite;
+        Text* levelSelectLeftText;
+        Text* levelSelectRightText;
+        Text* levelSelectLabelText;
 
         GameObject *startButton;
         Text *startButtonText;
-
-        GameObject *levelSelectLeft;
-        Text* levelSelectLeftText;
-
-        GameObject *levelSelectRight;
-        Text* levelSelectRightText;
-
-        GameObject *levelSelectLabel;
-        Text* levelSelectLabelText;
+        Sprite *startButtonBgSprite;
+        Sprite *startButtonFgSprite;
+        
 
         GameObject *currentlyPlayingLabel;
         Text* currentlyPlayingLabelText;

@@ -7,5 +7,5 @@ void Text::setFont(Font* font) {
 }
 
 void Text::execute(GameObject* parent) {
-    _fnt->printString(parent->position.x, parent->position.y, text);
+    _fnt->printString(parent->position.x+Component::relPos.x, parent->position.y+Component::relPos.y, text);
 }
