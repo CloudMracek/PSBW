@@ -52,4 +52,7 @@ class MainMenu : public Scene {
         GameObject *levelSelectLabel;
         Text* levelSelectLabelText;
 
+        GameObject *currentlyPlayingLabel;
+        Text* currentlyPlayingLabelText;
+
 };

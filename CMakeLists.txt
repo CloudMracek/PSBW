@@ -202,8 +202,8 @@ ENDIF()
 include(${PROJECT_SOURCE_DIR}/cmake/defines.cmake)
 read_yaml_and_set_defines(GameSettings.yaml)
 
-convertImage(assets/textures/pslib.png 16 ${GAME_NAME}/tex_pslib.dat)
-addBinaryFile(${GAME_NAME} textureData "${PROJECT_BINARY_DIR}/${GAME_NAME}/tex_pslib.dat")
-addBinaryFile(${GAME_NAME} soundData "${PROJECT_SOURCE_DIR}/assets/sounds/boing.vag")
+convertImage(font.png 4 font.dat fontPalette.dat)
+addBinaryFile(${PROJECT_NAME} debugFont "${PROJECT_BINARY_DIR}/font.dat")
+addBinaryFile(${PROJECT_NAME} debugFontPalette "${PROJECT_BINARY_DIR}/font.dat")
 
 

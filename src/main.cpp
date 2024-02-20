@@ -26,6 +26,6 @@ void main() {
 
 	for(;;) {
 		ctrl_update();
-		draw_update();
+		draw_update(true);
 	}
 }

@@ -311,6 +311,9 @@ Psxris::~Psxris()
     delete objGameOver;
     delete gameOverText;
 
+    delete currentlyPlayingLabel;
+    delete currentlyPlayingLabelText;
+
     cleanupArrays();
     
     Scene::~Scene();
@@ -365,10 +368,16 @@ void Psxris::sceneSetup()
     gameOverText->text = "";
     objGameOver->addComponent(gameOverText);
 
+    currentlyPlayingLabel = new GameObject(5,229,0);
+    currentlyPlayingLabelText = new Text();
+    currentlyPlayingLabelText->setFont(pixelFont);
+    currentlyPlayingLabel->addComponent(currentlyPlayingLabelText);
+
     Scene::addGameObject(objScore);
     Scene::addGameObject(objLevel);
     Scene::addGameObject(objNextLabel);
     Scene::addGameObject(objGameOver);
+    Scene::addGameObject(currentlyPlayingLabel);
 
     startGame();
 }
@@ -482,7 +491,27 @@ void Psxris::startGame() {
     blockType = randint(0, 6);
     nextBlockType = randint(0, 6);
 
-    soundPlayCdda(randint(2, 6), 1);
+    uint8_t track = randint(2, 6);
+    soundPlayCdda(track, 1);
+
+    switch(track) {
+        case 2:
+            currentlyPlayingLabelText->text = "RAMESES B - THERE FOR YOU [NCS RELEASE]";
+            break;
+        case 3:
+            currentlyPlayingLabelText->text = "RAMESES B - KEEP YOU | PHONK | NCS";
+            break;
+        case 4:
+            currentlyPlayingLabelText->text = "MEGGIE YORK - NUMBERS [ARCADE RELEASE]";
+            break;
+        case 5:
+            currentlyPlayingLabelText->text = "AVI SNOW, SYNC, MARKY STYLE - ALRIGHT | NCS";
+            break;
+        case 6:
+            currentlyPlayingLabelText->text = "PHANTOM SAGE - WHEN I'M GONE [NCS RELEASE]";
+            break;
+    }
+
     gameOver = false;
     gameOverText->text = "";
     sprintf(scoreBuf, "SCORE: 0");

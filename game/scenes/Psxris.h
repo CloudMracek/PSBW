@@ -72,6 +72,9 @@ private:
     GameObject *objGameOver;
     Text *gameOverText;
 
+    GameObject *currentlyPlayingLabel;
+    Text* currentlyPlayingLabelText;
+
     Sprite *renderArray[FIELD_ROWS][FIELD_COLS];
     Sprite *previewRenderArray[4][4];
 

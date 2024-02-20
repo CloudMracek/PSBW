@@ -26,14 +26,64 @@ typedef struct
 DMAChain *chain;
 uint8_t _graphicsMode;
 
+#define FONT_WIDTH 96
+#define FONT_HEIGHT 56
+#define FONT_COLOR_DEPTH GP0_COLOR_4BPP
+extern const uint8_t debugFont[], debugFontPalette[];
+Texture *debugFontTexture;
+Font *font;
+
 Scene *activeScene;
+
+void uploadIndexedTexture(
+	Texture *info, const void *image, const void *palette, int x, int y,
+	int paletteX, int paletteY, int width, int height, GP0ColorDepth colorDepth)
+{
+	int numColors = (colorDepth == GP0_COLOR_8BPP) ? 256 : 16;
+	int widthDivider = (colorDepth == GP0_COLOR_8BPP) ? 2 : 4;
+
+	vram_send_data(image, x, y, width / widthDivider, height);
+	waitForDMATransfer(DMA_GPU, 100000);
+	vram_send_data(palette, paletteX, paletteY, numColors, 1);
+	waitForDMATransfer(DMA_GPU, 100000);
+
+	info->page = gp0_page(
+		x / 64, y / 256, GP0_BLEND_SEMITRANS, colorDepth);
+	info->clut = gp0_clut(paletteX / 16, paletteY);
+	info->u = (uint8_t)((x % 64) * widthDivider);
+	info->v = (uint8_t)(y % 256);
+	info->width = (uint16_t)width;
+	info->height = (uint16_t)height;
+}
+
+void upload_debug_font() {
+	// Upload the debugFont to the vram
+	if(debugFontTexture == nullptr) {
+		debugFontTexture = new Texture();
+	}
+	uploadIndexedTexture(
+		debugFontTexture, debugFont, debugFontPalette, SCREEN_WIDTH * 2, 0, SCREEN_WIDTH * 2,
+		FONT_HEIGHT, FONT_WIDTH, FONT_HEIGHT, FONT_COLOR_DEPTH);
+	if(font == nullptr) {
+	font = new Font(debugFontTexture);
+	}
+	else {
+		delete font;
+		font = new Font(debugFontTexture);
+	}
+}
+
 void load_scene(Scene *scene)
 {
-	if(activeScene != nullptr) {
+	upload_debug_font();
+	draw_update(false);
+	if (activeScene != nullptr)
+	{
 		delete activeScene;
 	}
 	scene->loadData();
 	activeScene = scene;
+	update_random_seed();
 	activeScene->sceneSetup();
 }
 
@@ -127,28 +177,6 @@ void vram_send_data(const void *data, int x, int y, int width, int height)
 	DMA_CHCR(DMA_GPU) = DMA_CHCR_WRITE | DMA_CHCR_MODE_SLICE | DMA_CHCR_ENABLE;
 }
 
-void tex_upload(
-	Texture *info, const void *data, int x, int y, int width, int height)
-{
-	// Make sure the texture's size is valid. The GPU does not support textures
-	// larger than 256x256 pixels.
-	// Upload the texture to VRAM and wait for the process to complete.
-	vram_send_data(data, x, y, width, height);
-	waitForDMATransfer(DMA_GPU, 100000);
-	// Update the "texpage" attribute, a 16-bit field telling the GPU several
-	// details about the texture such as which 64x256 page it can be found in,
-	// its color depth and how semitransparent pixels shall be blended.
-	info->page = gp0_page(
-		x / 64, y / 256, GP0_BLEND_SEMITRANS, GP0_COLOR_16BPP);
-
-	// Calculate the texture's UV coordinates, i.e. its X/Y coordinates relative
-	// to the top left corner of the texture page.
-	info->u = (uint8_t)(x % 64);
-	info->v = (uint8_t)(y % 256);
-	info->width = (uint16_t)width;
-	info->height = (uint16_t)height;
-}
-
 void gpu_setup(GP1VideoMode mode, int width, int height)
 {
 
@@ -197,16 +225,15 @@ void draw_init()
 		gpu_setup(GP1_MODE_NTSC, SCREEN_WIDTH, SCREEN_HEIGHT);
 		_graphicsMode = GRAPHICS_MODE_NTSC;
 	}
-
 	GPU_GP1 = gp1_dispBlank(false);
 }
 
 bool currentBuffer = false;
 DMAChain dmaChains[2];
-void draw_update()
+void draw_update(bool doGameTick)
 {
-
-	activeScene->sceneLoop();
+	if (doGameTick)
+		activeScene->sceneLoop();
 
 	int frameX = currentBuffer ? SCREEN_WIDTH : 0;
 	int frameY = 0;
@@ -226,15 +253,22 @@ void draw_update()
 		frameX + SCREEN_WIDTH - 1, frameY + SCREEN_HEIGHT - 2);
 
 	ptr[3] = gp0_fbOrigin(frameX, frameY);
-
-	if (activeScene->backgroundImage == nullptr)
+	if (!doGameTick)
+	{
+		ptr = dma_allocate_packet(chain, 3);
+		ptr[0] = gp0_rgb(0, 0, 0) | gp0_vramFill();
+		ptr[1] = gp0_xy(frameX, frameY);
+		ptr[2] = gp0_xy(SCREEN_WIDTH, SCREEN_HEIGHT);
+	}
+	else if (activeScene->backgroundImage == nullptr)
 	{
 		ptr = dma_allocate_packet(chain, 3);
 		ptr[0] = gp0_rgb(64, 64, 64) | gp0_vramFill();
 		ptr[1] = gp0_xy(frameX, frameY);
 		ptr[2] = gp0_xy(SCREEN_WIDTH, SCREEN_HEIGHT);
 	}
-	else {
+	else
+	{
 		ptr = dma_allocate_packet(chain, 4);
 		ptr[0] = gp0_vramBlit();
 		ptr[1] = gp0_xy(activeScene->backgroundImage->x, activeScene->backgroundImage->y);
@@ -242,11 +276,17 @@ void draw_update()
 		ptr[3] = gp0_xy(SCREEN_WIDTH, SCREEN_HEIGHT);
 	}
 
-	GAMEOBJECT_ENTRY *entry = &activeScene->_linked_list;
-	while (entry != nullptr && entry->object != nullptr)
+	if (doGameTick)
 	{
-		entry->object->execute();
-		entry = entry->next;
+		GAMEOBJECT_ENTRY *entry = &activeScene->_linked_list;
+		while (entry != nullptr && entry->object != nullptr)
+		{
+			entry->object->execute();
+			entry = entry->next;
+		}
+	}
+	else {
+		font->printString(135,110, "LOADING...");
 	}
 
 	*(chain->nextPacket) = gp0_endTag(0);

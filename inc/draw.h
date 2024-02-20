@@ -9,14 +9,10 @@ class Scene;
 
 void load_scene(Scene* scene);
 void draw_init();
-void draw_update();
+void draw_update(bool doGameTick);
 
 uint8_t draw_get_graphics_mode();
 
 uint32_t *dma_get_chain_pointer(int numCommands);
 
 void vram_send_data(const void *data, int x, int y, int width, int height);
-
-void tex_upload(
-	Texture *info, const void *data, int x, int y, int width, int height
-);

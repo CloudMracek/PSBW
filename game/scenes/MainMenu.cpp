@@ -45,6 +45,9 @@ MainMenu::~MainMenu()
     delete levelSelectLabel;
     delete levelSelectLabelText;
 
+    delete currentlyPlayingLabel;
+    delete currentlyPlayingLabelText;
+
     Scene::~Scene();
 }
 
@@ -117,6 +120,12 @@ void MainMenu::sceneSetup()
     levelSelectLabelText->text = "LEVEL:";
     levelSelectLabel->addComponent(levelSelectLabelText);
 
+    currentlyPlayingLabel = new GameObject(5,229,0);
+    currentlyPlayingLabelText = new Text();
+    currentlyPlayingLabelText->setFont(pixelFont);
+    currentlyPlayingLabelText->text = "RAMESES B - THERE FOR YOU [NCS RELEASE]";
+    currentlyPlayingLabel->addComponent(currentlyPlayingLabelText);
+
     Scene::addGameObject(levelSelectBg);
     Scene::addGameObject(levelSelectFg);
     Scene::addGameObject(startButtonBg);
@@ -126,6 +135,7 @@ void MainMenu::sceneSetup()
     Scene::addGameObject(levelSelectLeft);
     Scene::addGameObject(levelSelectRight);
     Scene::addGameObject(levelSelectLabel);
+    Scene::addGameObject(currentlyPlayingLabel);
 
     controller1 = new Controller(CONTROLLER_PORT_1);
 }
