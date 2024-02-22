@@ -28,6 +28,8 @@ class Sprite : public Component {
         Sprite(SpriteType type, Texture* texture);
         
         int Width, Height;
+        int zIndex = 0;
+
         Vector3D Color;
         SpriteType Type;
         Texture* tex;

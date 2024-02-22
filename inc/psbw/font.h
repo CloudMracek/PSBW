@@ -4,7 +4,7 @@
 class Font {
     public:
         Font(Texture *texture);
-        void printString(int x, int y, char *str);
+        void printString(int x, int y, char *str, int zIndex);
     private:
         Texture *_tex;
 };

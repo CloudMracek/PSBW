@@ -57,6 +57,7 @@ void MainMenu::sceneSetup()
     levelSelectBgSprite->Width = 90;
     levelSelectBgSprite->Height = 20;
     levelSelectBgSprite->Color = {255, 255, 255};
+    levelSelectBgSprite->zIndex = 2;
     levelSelect->addComponent(levelSelectBgSprite);
 
     levelSelectFgSprite = new Sprite(SPRITE_TYPE_FLAT_COLOR);
@@ -64,6 +65,7 @@ void MainMenu::sceneSetup()
     levelSelectFgSprite->Width = 84;
     levelSelectFgSprite->Height = 14;
     levelSelectFgSprite->Color = {0, 0, 0};
+    levelSelectFgSprite->zIndex = 1;
     levelSelect->addComponent(levelSelectFgSprite);
 
     levelSelectBuf = (char *)malloc(50);
@@ -71,6 +73,7 @@ void MainMenu::sceneSetup()
     levelSelectText->relPos = {40, 6, 0};
     levelSelectText->setFont(pixelFont);
     levelSelectText->text = levelSelectBuf;
+    levelSelectText->zIndex = 0;
     sprintf(levelSelectBuf, "0");
     levelSelect->addComponent(levelSelectText);
 
@@ -78,12 +81,14 @@ void MainMenu::sceneSetup()
     levelSelectLeftText->relPos = {6, 6, 0};
     levelSelectLeftText->setFont(pixelFont);
     levelSelectLeftText->text = "<";
+    levelSelectLeftText->zIndex = 0;
     levelSelect->addComponent(levelSelectLeftText);
 
     levelSelectRightText = new Text();
     levelSelectRightText->relPos = {80, 6, 0};
     levelSelectRightText->setFont(pixelFont);
     levelSelectRightText->text = ">";
+    levelSelectRightText->zIndex = 0;
     levelSelect->addComponent(levelSelectRightText);
 
     levelSelectLabelText = new Text();
@@ -98,6 +103,7 @@ void MainMenu::sceneSetup()
     startButtonBgSprite->Width = 90;
     startButtonBgSprite->Height = 20;
     startButtonBgSprite->Color = {255, 255, 255};
+    startButtonBgSprite->zIndex = 2;
     startButton->addComponent(startButtonBgSprite);
 
     startButtonFgSprite = new Sprite(SPRITE_TYPE_FLAT_COLOR);
@@ -105,18 +111,21 @@ void MainMenu::sceneSetup()
     startButtonFgSprite->Width = 84;
     startButtonFgSprite->Height = 14;
     startButtonFgSprite->Color = {0, 0, 0};
+    startButtonFgSprite->zIndex = 1;
     startButton->addComponent(startButtonFgSprite);
 
     startButtonText = new Text();
     startButtonText->relPos = {31, 6, 0};
     startButtonText->setFont(pixelFont);
     startButtonText->text = "START";
+    startButtonText->zIndex = 0;
     startButton->addComponent(startButtonText);
 
     currentlyPlayingLabel = new GameObject(5,229,0);
     currentlyPlayingLabelText = new Text();
     currentlyPlayingLabelText->setFont(pixelFont);
     currentlyPlayingLabelText->text = "RAMESES B - THERE FOR YOU [NCS RELEASE]";
+    currentlyPlayingLabelText->zIndex = 0;
     currentlyPlayingLabel->addComponent(currentlyPlayingLabelText);
 
     Scene::addGameObject(levelSelect);

@@ -16,10 +16,12 @@
 // FIX: slower but fixes uploading textures whose size is not a multiple of 16 words
 #define DMA_MAX_CHUNK_SIZE 1
 #define CHAIN_BUFFER_SIZE 4096
+#define ORDERING_TABLE_SIZE 16
 
 typedef struct
 {
 	uint32_t data[CHAIN_BUFFER_SIZE];
+	uint32_t orderingTable[ORDERING_TABLE_SIZE];
 	uint32_t *nextPacket;
 } DMAChain;
 
@@ -34,6 +36,22 @@ Texture *debugFontTexture;
 Font *font;
 
 Scene *activeScene;
+
+void clearOrderingTable(uint32_t *table, int numEntries) {
+	// Set up the OTC DMA channel to transfer a new empty ordering table to RAM.
+	// The table is always reversed and generated "backwards" (the last item in
+	// the table is the first one that will be written), so we must give DMA a
+	// pointer to the end of the table rather than its beginning.
+	DMA_MADR(DMA_OTC) = (uint32_t) &table[numEntries - 1];
+	DMA_BCR (DMA_OTC) = numEntries;
+	DMA_CHCR(DMA_OTC) = 0
+		| DMA_CHCR_READ | DMA_CHCR_REVERSE | DMA_CHCR_MODE_BURST
+		| DMA_CHCR_ENABLE | DMA_CHCR_TRIGGER;
+
+	// Wait for DMA to finish generating the table.
+	while (DMA_CHCR(DMA_OTC) & DMA_CHCR_ENABLE)
+		__asm__ volatile("");
+}
 
 void uploadIndexedTexture(
 	Texture *info, const void *image, const void *palette, int x, int y,
@@ -113,7 +131,7 @@ static void dma_send_linked_list(const void *data)
 	DMA_CHCR(DMA_GPU) = DMA_CHCR_WRITE | DMA_CHCR_MODE_LIST | DMA_CHCR_ENABLE;
 }
 
-uint32_t *dma_allocate_packet(DMAChain *chain, int numCommands)
+uint32_t *dma_allocate_packet(DMAChain *chain, int numCommands, int zIndex)
 {
 	// Grab the current pointer to the next packet then increment it to allocate
 	// a new packet. We have to allocate an extra word for the packet's header,
@@ -123,18 +141,15 @@ uint32_t *dma_allocate_packet(DMAChain *chain, int numCommands)
 	uint32_t *ptr = chain->nextPacket;
 	chain->nextPacket += numCommands + 1;
 
-	// Write the header and set its pointer to point to the next packet that
-	// will be allocated in the buffer.
-	*ptr = gp0_tag(numCommands, chain->nextPacket);
+	*ptr = gp0_tag(numCommands, (void *) chain->orderingTable[zIndex]);
+	chain->orderingTable[zIndex] = gp0_tag(0, ptr);
 
-	// Make sure we haven't yet run out of space for future packets or a linked
-	// list terminator, then return a pointer to the packet's first GP0 command.
 	return &ptr[1];
 }
 
-uint32_t *dma_get_chain_pointer(int numCommands)
+uint32_t *dma_get_chain_pointer(int numCommands, int zIndex)
 {
-	return dma_allocate_packet(chain, numCommands);
+	return dma_allocate_packet(chain, numCommands, zIndex);
 }
 
 void vram_send_data(const void *data, int x, int y, int width, int height)
@@ -245,37 +260,39 @@ void draw_update(bool doGameTick)
 	uint32_t *ptr;
 	GPU_GP1 = gp1_fbOffset(frameX, frameY);
 
+	clearOrderingTable(chain->orderingTable, ORDERING_TABLE_SIZE);
 	chain->nextPacket = chain->data;
 
-	ptr = dma_allocate_packet(chain, 4);
-	ptr[0] = gp0_texpage(0, true, false);
-	ptr[1] = GPU_GP0 = gp0_fbOffset1(frameX, frameY);
-	ptr[2] = GPU_GP0 = gp0_fbOffset2(
-		frameX + SCREEN_WIDTH - 1, frameY + SCREEN_HEIGHT - 2);
-
-	ptr[3] = gp0_fbOrigin(frameX, frameY);
 	if (!doGameTick)
 	{
-		ptr = dma_allocate_packet(chain, 3);
+		ptr = dma_allocate_packet(chain, 3, ORDERING_TABLE_SIZE-1);
 		ptr[0] = gp0_rgb(0, 0, 0) | gp0_vramFill();
 		ptr[1] = gp0_xy(frameX, frameY);
 		ptr[2] = gp0_xy(SCREEN_WIDTH, SCREEN_HEIGHT);
 	}
 	else if (activeScene->backgroundImage == nullptr)
 	{
-		ptr = dma_allocate_packet(chain, 3);
+		ptr = dma_allocate_packet(chain, 3, ORDERING_TABLE_SIZE-1);
 		ptr[0] = gp0_rgb(64, 64, 64) | gp0_vramFill();
 		ptr[1] = gp0_xy(frameX, frameY);
 		ptr[2] = gp0_xy(SCREEN_WIDTH, SCREEN_HEIGHT);
 	}
 	else
 	{
-		ptr = dma_allocate_packet(chain, 4);
+		ptr = dma_allocate_packet(chain, 4, ORDERING_TABLE_SIZE-1);
 		ptr[0] = gp0_vramBlit();
 		ptr[1] = gp0_xy(activeScene->backgroundImage->x, activeScene->backgroundImage->y);
 		ptr[2] = gp0_xy(frameX, frameY);
 		ptr[3] = gp0_xy(SCREEN_WIDTH, SCREEN_HEIGHT);
 	}
+
+	ptr = dma_allocate_packet(chain, 4, ORDERING_TABLE_SIZE-1);
+	ptr[0] = gp0_texpage(0, true, false);
+	ptr[1] = GPU_GP0 = gp0_fbOffset1(frameX, frameY);
+	ptr[2] = GPU_GP0 = gp0_fbOffset2(
+		frameX + SCREEN_WIDTH - 1, frameY + SCREEN_HEIGHT - 1);
+
+	ptr[3] = gp0_fbOrigin(frameX, frameY);
 
 	if (doGameTick)
 	{
@@ -287,13 +304,13 @@ void draw_update(bool doGameTick)
 		}
 	}
 	else {
-		font->printString(135,110, "LOADING...");
+		font->printString(135,110, "LOADING...", 0);
 	}
 
 	*(chain->nextPacket) = gp0_endTag(0);
 	gpu_gp0_wait_ready();
 	VSync(0);
-	dma_send_linked_list(chain->data);
+	dma_send_linked_list(&(chain->orderingTable)[ORDERING_TABLE_SIZE - 1]);
 	waitForDMATransfer(DMA_GPU, 100000);
 }
 

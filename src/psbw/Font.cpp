@@ -118,7 +118,7 @@ Font::Font(Texture* texture) {
 	_tex = texture;
 }
 
-void Font::printString(int x, int y, char *str) {
+void Font::printString(int x, int y, char *str, int zIndex) {
 	int currentX = x, currentY = y;
 
 	uint32_t *ptr;
@@ -127,7 +127,7 @@ void Font::printString(int x, int y, char *str) {
 	// spritesheet. Note that the texpage command before a drawing command can
 	// be omitted when reusing the same texture, so sending it here just once is
 	// enough.
-	ptr    = dma_get_chain_pointer(1);
+	ptr    = dma_get_chain_pointer(1, zIndex);
 	ptr[0] = gp0_texpage(_tex->page, false, false);
 
 	// Iterate over every character in the string.
@@ -169,7 +169,7 @@ void Font::printString(int x, int y, char *str) {
 		// VRAM to those of the sprite itself within the sheet. Enable blending
 		// to make sure any semitransparent pixels in the font get rendered
 		// correctly.
-		ptr    = dma_get_chain_pointer(4);
+		ptr    = dma_get_chain_pointer(4, zIndex);
 		ptr[0] = gp0_rectangle(true, true, true);
 		ptr[1] = gp0_xy(currentX, currentY);
 		ptr[2] = gp0_uv(_tex->u + sprite->x, _tex->v + sprite->y, _tex->clut);

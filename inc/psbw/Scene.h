@@ -2,6 +2,11 @@
 #include "psbw/GameObject.h"
 #include "psbw/Fudgebundle.h"
 
+typedef enum SceneType {
+    SCENE_2D = 0,
+    SCENE_3D = 1
+};
+
 typedef struct GAMEOBJECT_ENTRY {
     GameObject* object;
     GAMEOBJECT_ENTRY* next;
@@ -18,6 +23,7 @@ class Scene {
         ~Scene();
         void loadData();
         
+        SceneType type = SCENE_2D;
         char* name;
         
         Vector2D *backgroundImage = nullptr;

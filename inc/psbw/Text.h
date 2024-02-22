@@ -9,6 +9,7 @@
 class Text : public Component {
     public:
         char* text;
+        int zIndex = 0;
         void execute(GameObject* parent) override;
         void setFont(Font* font);
     private:
