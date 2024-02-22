@@ -127,9 +127,6 @@ void Font::printString(int x, int y, char *str, int zIndex) {
 	// spritesheet. Note that the texpage command before a drawing command can
 	// be omitted when reusing the same texture, so sending it here just once is
 	// enough.
-	ptr    = dma_get_chain_pointer(1, zIndex);
-	ptr[0] = gp0_texpage(_tex->page, false, false);
-
 	// Iterate over every character in the string.
 	for (;;) {
 		char ch = *str;
@@ -174,6 +171,9 @@ void Font::printString(int x, int y, char *str, int zIndex) {
 		ptr[1] = gp0_xy(currentX, currentY);
 		ptr[2] = gp0_uv(_tex->u + sprite->x, _tex->v + sprite->y, _tex->clut);
 		ptr[3] = gp0_xy(sprite->width, sprite->height);
+
+		ptr    = dma_get_chain_pointer(1, zIndex);
+		ptr[0] = gp0_texpage(_tex->page, false, false);
 
 		// Move onto the next character.
 		currentX += sprite->width;
