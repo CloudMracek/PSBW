@@ -59,6 +59,7 @@ add_library(
 	game/main.cpp
 	game/scenes/MainMenu.cpp
 	game/scenes/Psxris.cpp
+	game/scenes/Test3D.cpp
 )
 
 target_include_directories(
@@ -80,12 +81,15 @@ add_executable(${PROJECT_NAME}
 	src/cdread.c 
 	src/cdmisc.c
 	src/filesystem.c  
+	src/gte.c
+	src/trig.c
 	 
 	#API
 	src/psbw/Sio.cpp 
 	src/psbw/Scene.cpp
 	src/psbw/GameObject.cpp 
 	src/psbw/Sprite.cpp 
+	src/psbw/Mesh.cpp
 	src/psbw/Text.cpp
 	src/psbw/Manager.cpp 
 	src/psbw/Controller.cpp 

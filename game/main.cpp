@@ -2,9 +2,9 @@
 
 #include <psbw/Manager.h>
 
-#include "scenes/MainMenu.h"
+#include "scenes/Test3D.h"
 
 void game_setup() {
-    MainMenu *mainMenu = new MainMenu("\\MENU.FDG");
-    psbw_load_scene(mainMenu);
+    Test3D *test = new Test3D("\\MENU.FDG");
+    psbw_load_scene(test);
 }

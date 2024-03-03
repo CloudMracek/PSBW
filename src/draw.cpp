@@ -7,6 +7,7 @@
 #include <ps1/system.h>
 
 #include "vsync.h"
+#include "gte.h"
 
 #include "psbw/Sprite.h"
 #include "psbw/GameObject.h"
@@ -16,7 +17,7 @@
 // FIX: slower but fixes uploading textures whose size is not a multiple of 16 words
 #define DMA_MAX_CHUNK_SIZE 1
 #define CHAIN_BUFFER_SIZE 4096
-#define ORDERING_TABLE_SIZE 16
+#define ORDERING_TABLE_SIZE 32
 
 typedef struct
 {
@@ -100,6 +101,11 @@ void load_scene(Scene *scene)
 	{
 		delete activeScene;
 	}
+
+	if(scene->type == SCENE_3D) {
+		gte_setup_3d(SCREEN_WIDTH, SCREEN_HEIGHT, ORDERING_TABLE_SIZE);
+	}
+
 	scene->loadData();
 	activeScene = scene;
 	update_random_seed();
@@ -197,6 +203,7 @@ void gpu_setup(GP1VideoMode mode, int width, int height)
 {
 
 	DMA_DPCR |= DMA_DPCR_ENABLE << (DMA_GPU * 4);
+	DMA_DPCR |= DMA_DPCR_ENABLE << (DMA_OTC * 4);
 
 	// Origin of framebuffer based on if PAL or NTSC
 	int x = 0x760;
@@ -317,4 +324,8 @@ void draw_update(bool doGameTick)
 uint8_t draw_get_graphics_mode()
 {
 	return _graphicsMode;
+}
+
+int getOtSize() {
+	return ORDERING_TABLE_SIZE;
 }

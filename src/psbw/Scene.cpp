@@ -8,7 +8,7 @@ Scene::Scene(char *sceneName) {
 }
 
 void Scene::loadData() {
-    _fdg = new Fudgebundle(name);
+   // _fdg = new Fudgebundle(name);
 }
 
 Scene::~Scene() {
