@@ -4,6 +4,7 @@
 #include "psbw/Texture.h"
 #include "psbw/Sound.h"
 #include "psbw/Vector.h"
+#include "psbw/BWM.h"
 
 typedef struct [[gnu::packed]] FDG_INDEX
 {
@@ -43,6 +44,7 @@ class Fudgebundle {
         Texture *fudgebundle_get_texture(uint32_t hash);
         Sound *fudgebundle_get_sound(uint32_t hash);
         Vector2D *fudgebundle_get_background(uint32_t hash);
+        BWM* fudgebundle_get_mesh(uint32_t hash);
 
     private:
         FDG_INDEX* _fdg_index;

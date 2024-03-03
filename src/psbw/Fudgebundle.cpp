@@ -259,3 +259,16 @@ Vector2D *Fudgebundle::fudgebundle_get_background(uint32_t hash) {
 
     return out;
 }
+
+BWM* Fudgebundle::fudgebundle_get_mesh(uint32_t hash) {
+    FDG_HASH_ENTRY *entry;
+    entry = _fudgebundle_get_entry(hash);
+
+    BWM* mesh = new BWM();
+    mesh->header = (BWM_HEADER*) _ram_data+entry->offset;
+    mesh->vertices = (BWM_VERTEX*)((uint8_t*)(mesh->header) + sizeof(BWM_HEADER));
+    mesh->normals = (BWM_NORMAL*)((uint8_t*)(mesh->vertices) + sizeof(BWM_VERTEX)*mesh->header->numVertices);
+    mesh->uvs = (BWM_UV*)((uint8_t*)(mesh->normals) + sizeof(BWM_NORMAL)*mesh->header->numNormals);
+    mesh->faces = (BWM_FACE*)((uint8_t*)(mesh->uvs) + sizeof(BWM_UV)*mesh->header->numUVs);
+    return mesh;
+}

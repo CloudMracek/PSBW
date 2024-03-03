@@ -16,6 +16,7 @@
 			<file name="${GAME_NAME}.EXE"	type="data" source="${GAME_NAME}.psexe" />
 			<file name="MENU.FDG" type="data" source="${PROJECT_SOURCE_DIR}/assets/menu.fdg"/>
 			<file name="GAME.FDG" type="data" source="${PROJECT_SOURCE_DIR}/assets/game.fdg"/>
+			<file name="3DTEST.FDG" type="data" source="${PROJECT_SOURCE_DIR}/assets/3dtest.fdg"/>
 			<dummy sectors="1024"/>
 		</directory_tree>
 	</track>

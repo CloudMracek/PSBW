@@ -1,6 +1,7 @@
 #pragma once
 #include "psbw/GameObject.h"
 #include "psbw/Fudgebundle.h"
+#include "psbw/BWM.h"
 
 typedef enum SceneType {
     SCENE_2D = 0,
@@ -34,6 +35,7 @@ class Scene {
         Texture* getTexture(char *name);
         Sound* getSound(char *name);
         void setBackground(char* name);
+        BWM *getMesh(char *name);
 
         virtual void sceneSetup() = 0;
         virtual void sceneLoop() = 0;

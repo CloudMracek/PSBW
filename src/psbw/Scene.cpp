@@ -8,7 +8,7 @@ Scene::Scene(char *sceneName) {
 }
 
 void Scene::loadData() {
-   // _fdg = new Fudgebundle(name);
+    _fdg = new Fudgebundle(name);
 }
 
 Scene::~Scene() {
@@ -56,4 +56,8 @@ Sound* Scene::getSound(char *name) {
 
 void Scene::setBackground(char *name) {
     backgroundImage = _fdg->fudgebundle_get_background(fdg_hash(name));
+}
+
+BWM* Scene::getMesh(char* name) {
+    return _fdg->fudgebundle_get_mesh(fdg_hash(name));
 }
