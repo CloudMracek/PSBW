@@ -1,4 +1,4 @@
-#include "psbw/sio.h"
+#include "psbw/Sio.h"
 
 #include <ps1/registers.h>
 

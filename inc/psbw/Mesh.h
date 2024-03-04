@@ -2,7 +2,7 @@
 
 #include "psbw/Component.h"
 
-#include "bwm.h"
+#include "BWM.h"
 
 class Mesh : public Component {
     public:
