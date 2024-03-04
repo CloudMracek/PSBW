@@ -12,6 +12,7 @@ void Test3D::sceneSetup()
     cube = new GameObject(0,0,0);
     cubeMesh = new Mesh();
     cubeMesh->mesh = Scene::getMesh("cube");
+    cubeMesh->texture = Scene::getTexture("dumbass");
     cube->addComponent(cubeMesh);
     Scene::addGameObject(cube);
 }

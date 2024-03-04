@@ -7,6 +7,10 @@
 #include "vsync.h"
 #include "gte.h"
 
+#define GTE_STORE(reg, offset, ptr) \
+	__asm__ volatile("swc2 $%0, %1(%2);" :: "i"(reg), "i"(offset), "r"(ptr) : "memory")
+#define gte_store(reg, offset, ptr) GTE_STORE(reg, (offset) * 4, ptr)
+
 typedef struct
 {
     uint8_t vertices[4];
@@ -31,6 +35,7 @@ void Mesh::execute(GameObject *parent)
     i++;
 
     uint32_t *ptr;
+
     for (int i = 0; i < mesh->header->numFaces; i++) {
 			const BWM_FACE *face = &mesh->faces[i];
 
@@ -69,9 +74,23 @@ void Mesh::execute(GameObject *parent)
 
 			// Create a new quad and give its vertices the X/Y coordinates
 			// calculated by the GTE.
-			ptr    = dma_get_chain_pointer(5, zIndex);
-			ptr[0] = 0xffffff | gp0_shadedQuad(false, false, false);
-			ptr[1] = xy0;
-			gte_storeSXY012(&ptr[2]);
+
+			if(texture != nullptr) {
+			ptr    = dma_get_chain_pointer(10, zIndex);
+			ptr[0] = gp0_texpage(texture->page, false, false);
+			ptr[1] = 0xaaaaaa | gp0_shadedQuad(false, true, false);
+
+			ptr[2] = xy0;
+			ptr[3] = gp0_uv(texture->u + mesh->uvs[face->u0].u, texture->v + mesh->uvs[face->u0].v,texture->clut);
+			
+			gte_store(GTE_SXY0, 4, ptr);
+			ptr[5] = gp0_uv(texture->u + mesh->uvs[face->u1].u, texture->v + mesh->uvs[face->u1].v,texture->page);
+
+			gte_store(GTE_SXY1, 6, ptr);
+			ptr[7] = gp0_uv(texture->u + mesh->uvs[face->u2].u, texture->v + mesh->uvs[face->u2].v,0);
+
+			gte_store(GTE_SXY2, 8, ptr);
+			ptr[9] = gp0_uv(texture->u + mesh->uvs[face->u3].u, texture->v + mesh->uvs[face->u3].v,0);
+			}
 		}
 }
