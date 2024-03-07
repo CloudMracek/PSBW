@@ -34,6 +34,7 @@ jobs:
       # Build your program with the given configuration
       run: cmake --build ${{github.workspace}}/build
   release:
+    needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: write
