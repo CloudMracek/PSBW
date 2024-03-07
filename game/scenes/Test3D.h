@@ -3,6 +3,7 @@
 #include <psbw/Scene.h>
 #include <psbw/GameObject.h>
 #include <psbw/Mesh.h>
+#include <psbw/Controller.h>
 
 class Test3D : public Scene {
     public:
@@ -14,5 +15,6 @@ class Test3D : public Scene {
     private:
         GameObject* cube;
         Mesh* cubeMesh;
+        Controller* ctrl;
 
 };

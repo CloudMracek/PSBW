@@ -5,3 +5,4 @@
 * \brief Loads the specified scene with it's assets into ram and starts playing it. Also unloads the currently loaded scene.
 */
 void psbw_load_scene(Scene* scene);
+Scene* psbw_get_active_scene();

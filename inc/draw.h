@@ -17,4 +17,6 @@ uint32_t *dma_get_chain_pointer(int numCommands, int zIndex);
 
 void vram_send_data(const void *data, int x, int y, int width, int height);
 
+Scene* get_active_scene();
+
 int getOtSize();

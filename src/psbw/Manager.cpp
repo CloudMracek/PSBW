@@ -7,3 +7,7 @@
 void psbw_load_scene(Scene* scene) {
     load_scene(scene);
 }
+
+Scene* psbw_get_active_scene() {
+    return get_active_scene();
+}

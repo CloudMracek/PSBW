@@ -9,6 +9,7 @@
 #include "vsync.h"
 #include "gte.h"
 
+#include "psbw/Manager.h"
 #include "psbw/Sprite.h"
 #include "psbw/GameObject.h"
 #include "psbw/Texture.h"
@@ -110,6 +111,10 @@ void load_scene(Scene *scene)
 	activeScene = scene;
 	update_random_seed();
 	activeScene->sceneSetup();
+}
+
+Scene* get_active_scene() {
+	return activeScene;
 }
 
 // Private util functions

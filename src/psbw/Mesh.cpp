@@ -7,6 +7,8 @@
 #include "vsync.h"
 #include "gte.h"
 
+#include "psbw/Manager.h"
+
 #define GTE_STORE(reg, offset, ptr) \
 	__asm__ volatile("swc2 $%0, %1(%2);" :: "i"(reg), "i"(offset), "r"(ptr) : "memory")
 #define gte_store(reg, offset, ptr) GTE_STORE(reg, (offset) * 4, ptr)
@@ -25,13 +27,19 @@ int i = 0;
 void Mesh::execute(GameObject *parent)
 {
 
-    gte_setTranslationVector(0, 0, 256);
+	Camera* activeCamera = psbw_get_active_scene()->camera;
+	
+    gte_setTranslationVector(
+	-activeCamera->position.x+parent->position.x, 
+	-activeCamera->position.y+parent->position.y, 
+	-activeCamera->position.z+parent->position.z);
+
     gte_setRotationMatrix(
         ONE,    0,      0,
         0,      ONE,    0,
         0,      0,      ONE
     );
-    gte_rotate_current_matrix((i*16)%4096,(i*16)%4096,0);
+    //gte_rotate_current_matrix((i*16)%4096,(i*16)%4096,0);
     i++;
 
     uint32_t *ptr;

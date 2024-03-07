@@ -2,6 +2,7 @@
 #include "psbw/GameObject.h"
 #include "psbw/Fudgebundle.h"
 #include "psbw/BWM.h"
+#include "psbw/Camera.h"
 
 typedef enum SceneType {
     SCENE_2D = 0,
@@ -28,6 +29,8 @@ class Scene {
         char* name;
         
         Vector2D *backgroundImage = nullptr;
+
+        Camera *camera;
         
         void addGameObject(GameObject *object);
         GAMEOBJECT_ENTRY _linked_list;
