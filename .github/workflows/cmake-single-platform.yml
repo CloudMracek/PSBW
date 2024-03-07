@@ -43,4 +43,5 @@ jobs:
     - uses: ncipollo/release-action@v1
       with:
         artifacts: "build/game.cue,build/game.bin"
+        tag: ${{env.GITHUB_REF_NAME}}
 
