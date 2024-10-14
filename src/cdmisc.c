@@ -9,6 +9,7 @@
 #include <string.h>
 
 #include <ps1/registers.h>
+#include <vendor/printf.h>
 
 #define DATA_SYNC_TIMEOUT 0x100000
 

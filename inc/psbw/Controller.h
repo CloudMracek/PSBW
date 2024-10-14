@@ -6,6 +6,7 @@ typedef uint8_t ControllerPort;
 #define CONTROLLER_PORT_1 0
 #define CONTROLLER_PORT_2 1
 
+int card_test();
 
 /**
  * \class ControllerButton

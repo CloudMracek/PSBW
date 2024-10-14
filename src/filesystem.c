@@ -305,8 +305,6 @@ static int get_pathtable_entry(int entry, ISO_PATHTABLE_ENTRY *tbl, char *namebu
 	tbl_pos = _cd_iso_pathtable_buff;
 	tbl_entry = (ISO_PATHTABLE_ENTRY*)tbl_pos;
 
-	uint8_t* test = (uint8_t*) tbl_pos+2;
-	uint32_t* test2 = (uint16_t*) test;
 	i = 0;
 	while( (int)(tbl_pos-_cd_iso_pathtable_buff) <
 		descriptor->pathTableSize.lsb )

@@ -1,0 +1,68 @@
+[
+    {
+        "name": "blue",
+        "type": "texture",
+        "from": "blue.png",
+        "bpp":  16
+    },
+    {
+        "name": "green",
+        "type": "texture",
+        "from": "green.png",
+        "bpp":  16
+    },
+    {
+        "name": "orange",
+        "type": "texture",
+        "from": "orange.png",
+        "bpp":  16
+    },
+    {
+        "name": "turqoise",
+        "type": "texture",
+        "from": "turqoise.png",
+        "bpp":  16
+    },
+    {
+        "name": "purple",
+        "type": "texture",
+        "from": "purple.png",
+        "bpp":  16
+    },
+    {
+        "name": "red",
+        "type": "texture",
+        "from": "red.png",
+        "bpp":  16
+    },
+    {
+        "name": "yellow",
+        "type": "texture",
+        "from": "yellow.png",
+        "bpp":  16
+    },
+    {
+        "name": "font",
+        "type": "texture",
+        "from": "font.png",
+        "bpp":  8
+    },
+    {
+        "name": "gamebg",
+        "type": "bg",
+        "from": "gamebg.png"
+    },
+    {
+        "name": "gameover",
+        "type": "sound",
+        "from": "gameover.wav",
+        "sampleRate": 22050
+    },
+    {
+        "name": "place",
+        "type": "sound",
+        "from": "place.wav",
+        "sampleRate": 22050
+    }
+    
+]

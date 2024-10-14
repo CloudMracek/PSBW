@@ -83,6 +83,7 @@ add_executable(${PROJECT_NAME}
 	src/filesystem.c  
 	src/gte.c
 	src/trig.c
+	src/sio0.cpp
 	 
 	#API
 	src/psbw/Sio.cpp 
@@ -207,7 +208,9 @@ include(${PROJECT_SOURCE_DIR}/cmake/defines.cmake)
 read_yaml_and_set_defines(GameSettings.yaml)
 
 convertImage(font.png 4 font.dat fontPalette.dat)
+
 addBinaryFile(${PROJECT_NAME} debugFont "${PROJECT_BINARY_DIR}/font.dat")
 addBinaryFile(${PROJECT_NAME} debugFontPalette "${PROJECT_BINARY_DIR}/font.dat")
+
 
 

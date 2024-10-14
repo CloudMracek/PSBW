@@ -38,8 +38,11 @@ public:
 
 private:
 
+    bool firstGO = true;
+
     char *scoreBuf;
     char *levelBuf;
+    char *highScoreBuf;
 
     Controller *controller1;
     bool buttonLeftFast, buttonRightFast = false;
@@ -71,6 +74,9 @@ private:
 
     GameObject *objGameOver;
     Text *gameOverText;
+
+    GameObject *objHighScore;
+    Text *highScoreText;
 
     GameObject *currentlyPlayingLabel;
     Text* currentlyPlayingLabelText;

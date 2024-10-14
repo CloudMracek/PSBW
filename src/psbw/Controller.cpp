@@ -1,37 +1,14 @@
 #include "psbw/Controller.h"
 
 #include <string.h>
+#include <stdio.h>
 
 #include "ps1/registers.h"
 #include "ps1/system.h"
 
+#include "sio0.h"
 
-void ctrl_init(void) {
-	// Reset the serial interface, initialize it with the settings used by
-	// controllers and memory cards (250000bps, 8 data bits) and configure it to
-	// send a signal to the interrupt controller whenever the DSR input is
-	// pulsed (see below).
-	SIO_CTRL(0) = SIO_CTRL_RESET;
 
-	SIO_MODE(0) = SIO_MODE_BAUD_DIV1 | SIO_MODE_DATA_8;
-	SIO_BAUD(0) = F_CPU / 250000;
-	SIO_CTRL(0) =
-		SIO_CTRL_TX_ENABLE | SIO_CTRL_RX_ENABLE | SIO_CTRL_DSR_IRQ_ENABLE;
-}
-
-static bool ctrl_wait_acknowledge(int timeout) {
-	// Controllers and memory cards will acknowledge bytes received by sending
-	// short pulses over the DSR line, which will be forwarded by the serial
-	// interface to the interrupt controller. This is not guaranteed to happen
-	// (it will not if e.g. no device is connected), so we have to implement a
-	// timeout to avoid waiting forever in such cases.
-	if (waitForInterrupt(IRQ_SIO0, timeout)) {
-		SIO_CTRL(0) |= SIO_CTRL_ACKNOWLEDGE;
-		return true;
-	}
-
-	return false;
-}
 
 typedef enum {
 	CMD_INIT_PRESSURE   = '@', // Initialize DualShock pressure sensors (config)
@@ -53,30 +30,7 @@ typedef enum {
 #define DTR_DELAY   60
 #define DSR_TIMEOUT 120
 
-static void ctrl_port_select(int port) {
-	// Set or clear the bit that controls which set of controller and memory
-	// card ports is going to have its DTR (port select) signal asserted. The
-	// actual serial bus is shared between all ports, however devices will not
-	// process packets if DTR is not asserted on the port they are plugged into.
-	if (port)
-		SIO_CTRL(0) |= SIO_CTRL_CS_PORT_2;
-	else
-		SIO_CTRL(0) &= ~SIO_CTRL_CS_PORT_2;
-}
 
-static uint8_t ctrl_exchange_byte(uint8_t value) {
-	// Wait until the interface is ready to accept a byte to send, then wait for
-	// it to finish receiving the byte sent by the device.
-	while (!(SIO_STAT(0) & SIO_STAT_TX_NOT_FULL))
-		__asm__ volatile("");
-
-	SIO_DATA(0) = value;
-
-	while (!(SIO_STAT(0) & SIO_STAT_RX_NOT_EMPTY))
-		__asm__ volatile("");
-
-	return SIO_DATA(0);
-}
 
 static int ctrl_exchange_packet(
 	const uint8_t *request, uint8_t *response, int reqLength, int maxRespLength
@@ -96,7 +50,7 @@ static int ctrl_exchange_packet(
 	// prepare for the actual packet transfer.
 	SIO_DATA(0) = 0x01;
 
-	if (ctrl_wait_acknowledge(DSR_TIMEOUT)) {
+	if (sio0_wait_acknowledge(DSR_TIMEOUT)) {
 		while (SIO_STAT(0) & SIO_STAT_RX_NOT_EMPTY)
 			SIO_DATA(0);
 
@@ -105,10 +59,10 @@ static int ctrl_exchange_packet(
 		// the data being sent.
 		while (respLength < maxRespLength) {
 			if (reqLength > 0) {
-				*(response++) = ctrl_exchange_byte(*(request++));
+				*(response++) = sio0_exchange_byte(*(request++), false);
 				reqLength--;
 			} else {
-				*(response++) = ctrl_exchange_byte(0);
+				*(response++) = sio0_exchange_byte(0, false);
 			}
 
 			respLength++;
@@ -116,7 +70,7 @@ static int ctrl_exchange_packet(
 			// The device will keep sending DSR pulses as long as there is more
 			// data to transfer. If no more pulses are received, terminate the
 			// transfer.
-			if (!ctrl_wait_acknowledge(DSR_TIMEOUT))
+			if (!sio0_wait_acknowledge(DSR_TIMEOUT))
 				break;
 		}
 	}
@@ -127,9 +81,6 @@ static int ctrl_exchange_packet(
 
 	return respLength;
 }
-
-
-
 
 uint8_t ctrlState[2][8];
 
@@ -146,7 +97,7 @@ void ctrl_update() {
 	request[3] = 0x00;     // Rumble motor control 2
 
 	memcpy(&ctrlPrevState[CONTROLLER_PORT_1], &ctrlState[CONTROLLER_PORT_1], 8);
-    ctrl_port_select(CONTROLLER_PORT_1);
+    sio0_port_select(CONTROLLER_PORT_1);
     int respLength = ctrl_exchange_packet(
 		request, ctrlState[CONTROLLER_PORT_1], sizeof(request), sizeof(response)
 	);
@@ -159,7 +110,7 @@ void ctrl_update() {
 	}
 
 	memcpy(&ctrlPrevState[CONTROLLER_PORT_2], &ctrlState[CONTROLLER_PORT_2], 8);
-    ctrl_port_select(CONTROLLER_PORT_2);
+    sio0_port_select(CONTROLLER_PORT_2);
     respLength = ctrl_exchange_packet(
 		request, ctrlState[CONTROLLER_PORT_2], sizeof(request), sizeof(response)
 	);

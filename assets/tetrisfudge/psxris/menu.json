@@ -1,0 +1,13 @@
+[
+    {
+        "name": "font",
+        "type": "texture",
+        "from": "font.png",
+        "bpp":  8
+    },
+    {
+        "name": "menubg",
+        "type": "bg",
+        "from": "menubg.png"
+    }
+]

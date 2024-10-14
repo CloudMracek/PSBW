@@ -1,0 +1,13 @@
+[
+    {
+        "name": "cube",
+        "type": "file",
+        "from": "cube.bwm"
+    },
+    {
+        "name": "dumbass",
+        "type": "texture",
+        "from": "dumbass.png",
+        "bpp": 16
+    }
+]

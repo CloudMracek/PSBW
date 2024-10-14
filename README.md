@@ -1,4 +1,8 @@
 # PSBW
+
+## WARNING:
+**THIS CODE IS A MESS. It's a school project finished on the last minute and I don't give any warranty with it. This code is to be rewritten on top of psyqo and this is pretty much a public archive. A better engine is comming. This is a proof of concept.**
+
 A game engine for the PSX based on [spicyjpeg's bare metal tutorials](https://github.com/spicyjpeg/ps1-bare-metal/)
 The toolchain, cmake and basic header files are taken from his project and will be built upon. They are and will be developed under the MIT license
 
@@ -46,16 +50,22 @@ This projects builds its own mkpsxiso from source on Linux
 cmake --preset debug
 cmake --build ./build
 ```
+game.cue and game.bin will be found in the build directory
 
-### Build documentation
-```
-doxygen Doxyfile
-```
+## How to use
+You're gonna need [psxfudge](https://github.com/spicyjpeg/psxfudge/tree/refactor) make sure to use the refactor branch. If you get audio resampler errors
+while using it, use [my fork](https://github.com/CloudMracek/psxfudge-fix) instead. Fudgebundle is pretty easy to use. Just read its [documentation](https://github.com/spicyjpeg/psxfudge/blob/refactor/doc/fudgebundle.md)
 
-## How to run
-If you have a PSX you can either burn a CD with the output bin/cue files or upload it directly to the PSX using a serial link cable.
+**SPRITESHEETS AND OTHER HANDY-DANDY FEATURES OF FUDGEBUNDLE ARE NOT SUPPORTED BY THIS ENGINE**
 
-Or you can use an emulator like [pcsx-redux](https://github.com/grumpycoders/pcsx-redux)
+Once you create your bundle you need to put it into assets and tell mkpsxiso (which is called by cmake) to bundle it in in iso.xml in the root of the project.
+
+If you want to see the source JSONs for the Tetris clone bundles they can be found in assets/tetrisfudge
+
+Now go read game/main.cpp and game/MainMenu.cpp where the coding of the engine is explained.
+
+# Disclaimer
+This engine contains a lot of PSn00b code. If the original creators of that code want this taken down, please contact me and I will...
 
 # Thanks
 Thanks to [spicyjpeg](https://github.com/spicyjpeg/) who is the author of the register header files, the cmake files, the compiler configuration and who's been extemely helpful with debugging some complex issues

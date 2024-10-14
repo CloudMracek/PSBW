@@ -16,6 +16,7 @@
 
 #include "cdrom.h"
 #include "interrupts.h"
+#include "vsync.h"
 
 #define CD_READ_TIMEOUT		180
 #define CD_READ_COOLDOWN	60

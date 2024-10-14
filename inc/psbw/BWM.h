@@ -8,8 +8,8 @@ typedef struct [[gnu::packed]] BWM_HEADER {
     uint16_t numFaces, numVertices, numNormals, numUVs;
 };
 
-typedef struct [[gnu::packed]] BWM_VERTEX {
-    int16_t x,y,z;
+typedef struct BWM_VERTEX {
+    int16_t x,y,z,pad;
 };
 
 typedef struct [[gnu::packed]] BWM_NORMAL {

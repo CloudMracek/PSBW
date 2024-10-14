@@ -10,7 +10,7 @@
 			application		="PLAYSTATION"
 			copyright		="README.TXT;1"
 		/>
-
+		<!--<license file="${PROJECT_SOURCE_DIR}/LICENSEE.DAT"/>-->
 		<directory_tree>
 			<file name="SYSTEM.CNF"		type="data" source="${PROJECT_BINARY_DIR}/system.cnf" />
 			<file name="${GAME_NAME}.EXE"	type="data" source="${GAME_NAME}.psexe" />

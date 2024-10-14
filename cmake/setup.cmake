@@ -63,7 +63,7 @@ target_compile_options(
 	>
 	$<IF:$<CONFIG:Debug>,
 		# These options will only be added if CMAKE_BUILD_TYPE is set to Debug.
-		-Og
+		-O0
 		-mdivide-breaks
 	,
 		# These options will be added if CMAKE_BUILD_TYPE is not set to Debug.

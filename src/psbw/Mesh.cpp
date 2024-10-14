@@ -39,7 +39,7 @@ void Mesh::execute(GameObject *parent)
         0,      ONE,    0,
         0,      0,      ONE
     );
-    gte_rotate_current_matrix((i*16)%4096,(i*16)%4096,0);
+    //gte_rotate_current_matrix((i*16)%4096,(i*16)%4096,0);
     i++;
 
     uint32_t *ptr;

@@ -7,6 +7,7 @@
 #include <draw.h>
 
 #include "psbw/Manager.h"
+#include "card.h"
 
 #include "MainMenu.h"
 
@@ -19,6 +20,8 @@
 #define _R Red
 #define _T Turqoise
 #define _Y Yellow
+
+/* I don't feel like explaining this code as in detail as the main menu but it's the same concept...*/
 
 #pragma region BLOCKDEF
 BlockColor I_block[4][4][4] = {
@@ -92,7 +95,7 @@ BlockColor I_block[4][4][4] = {
         {_E, _E, _E, _E},
         {_E, _E, _E, _E},
         {_P, _P, _P, _E},
-        {_E, _E, _P, _E},
+        {_P, _E, _E, _E},
     },
     {
         {_E, _P, _E, _E},
@@ -245,7 +248,7 @@ BlockColor (*getBlockArray(uint8_t blockType, uint8_t rotation))[4][4]
         break;
 
     default:
-        return NULL; // Returning NULL as a default case since the function return type is not void
+        return nullptr; 
     }
 
     return piece;
@@ -311,6 +314,9 @@ Psxris::~Psxris()
     delete objGameOver;
     delete gameOverText;
 
+    delete objHighScore;
+    delete highScoreText;
+
     delete currentlyPlayingLabel;
     delete currentlyPlayingLabelText;
 
@@ -343,6 +349,7 @@ void Psxris::sceneSetup()
 
     scoreBuf = (char *)malloc(50);
     levelBuf = (char *)malloc(50);
+    highScoreBuf = (char *)malloc(50);
 
     objScore = new GameObject(227, 103, 0);
     scoreText = new Text();
@@ -368,6 +375,15 @@ void Psxris::sceneSetup()
     gameOverText->text = "";
     objGameOver->addComponent(gameOverText);
 
+    // DON'T USE CARDSAVING. IT CORRUPTS CARDS
+    /*objHighScore = new GameObject(5,190,0);
+    highScoreText = new Text();
+    highScoreText->setFont(pixelFont);
+    //uint32_t highScore = card_load();
+    sprintf(highScoreBuf, "HIGH SCORE\n%d", highScore);
+    highScoreText->text = highScoreBuf;
+    objHighScore->addComponent(highScoreText);*/
+
     currentlyPlayingLabel = new GameObject(5,229,0);
     currentlyPlayingLabelText = new Text();
     currentlyPlayingLabelText->setFont(pixelFont);
@@ -377,6 +393,7 @@ void Psxris::sceneSetup()
     Scene::addGameObject(objLevel);
     Scene::addGameObject(objNextLabel);
     Scene::addGameObject(objGameOver);
+    //Scene::addGameObject(objHighScore);
     Scene::addGameObject(currentlyPlayingLabel);
 
     startGame();
@@ -800,6 +817,7 @@ void Psxris::checkFullLines()
     }
 }
 
+
 void Psxris::sceneLoop()
 {
    if (gameOver)
@@ -807,7 +825,22 @@ void Psxris::sceneLoop()
         soundStopCdda();
         clearRenderArray();
         clearGameArray();
-        gameOverText->text = "GAME\nOVER\nPRESS\nX\nTO\nRETURN";
+        
+        if(firstGO) {
+            gameOverText->text = "GAME\nOVER";
+            //int32_t oldHighScore = card_load();
+            //if(oldHighScore < currentScore) {
+                
+                // This engine can do cardsaving. IT WILL BREAK YOUR OTHER GAME SAVEGAMES! DONT USE!!!!
+                //card_save(currentScore);
+            //    gameOverText->text = "GAME\nOVER\nX TO\nRETURN";
+            //}
+            
+            gameOverText->text = "GAME\nOVER\nX TO\nRETURN";
+            
+            firstGO = false;
+        }
+        
 
         if (controller1->GetButton(X))
         {
