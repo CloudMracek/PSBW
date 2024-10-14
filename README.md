@@ -62,7 +62,10 @@ Once you create your bundle you need to put it into assets and tell mkpsxiso (wh
 
 If you want to see the source JSONs for the Tetris clone bundles they can be found in assets/tetrisfudge
 
-Now go read game/main.cpp and game/MainMenu.cpp where the coding of the engine is explained.
+Now go read game/main.cpp and game/scenes/MainMenu.cpp where the coding of the engine is explained.
+
+If you want to use the 3D capabilties go check out game/scenes/Test3D.cpp
+You can convert .obj files to .bwm files which this engine uses using [this tool](https://github.com/CloudMracek/BWM-Tools)
 
 # Disclaimer
 This engine contains a lot of PSn00b code. If the original creators of that code want this taken down, please contact me and I will...
